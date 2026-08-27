@@ -1,0 +1,31 @@
+{
+  "stop_reason": "max_iterations",
+  "cycles": 20,
+  "wall_seconds": 1222.0,
+  "best_primary": null,
+  "beat_baseline": false,
+  "baseline_primary": 0.6016,
+  "delta_vs_baseline": 0.0,
+  "submission_checkpoint": "official-baseline (nothing beat it)",
+  "best_checkpoint": null,
+  "primary_history": [
+    0.599933385848999,
+    0.5994541645050049,
+    0.599933385848999,
+    0.5999228954315186,
+    0.5991086959838867,
+    0.5999228954315186,
+    0.6023244857788086,
+    0.5988004803657532,
+    0.597625732421875,
+    0.5988004803657532,
+    0.4987124502658844,
+    0.6020947098731995,
+    0.5969887971878052,
+    0.5994541645050049
+  ],
+  "tokens_in": 158802,
+  "tokens_out": 0,
+  "gpu_hours": 0.152,
+  "manual_interventions": 0
+}

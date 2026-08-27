@@ -1,0 +1,31 @@
+{
+  "stop_reason": "max_iterations",
+  "cycles": 6,
+  "wall_seconds": 420.3,
+  "start_primary": 0.601384162902832,
+  "best_primary": 0.601384162902832,
+  "improvement_over_start": 0.0,
+  "beat_baseline": 0.0,
+  "baseline_primary": 0.6016,
+  "delta_vs_baseline": -0.00019999999494757503,
+  "submission_checkpoint": "agent-best",
+  "best_checkpoint": null,
+  "primary_history": [],
+  "tokens_by_role": {
+    "analyst": 8098,
+    "classifier": 14678,
+    "inventor": 16318,
+    "coder": 37289
+  },
+  "model_routing": {
+    "analyst": "gpt-4o-mini",
+    "classifier": "gpt-4o",
+    "inventor": "gpt-4o",
+    "coder": "gpt-4o",
+    "reflector": "gpt-4o-mini"
+  },
+  "tokens_in": 58771,
+  "tokens_out": 0,
+  "gpu_hours": 0.0,
+  "manual_interventions": 0
+}

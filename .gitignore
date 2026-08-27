@@ -1,0 +1,41 @@
+# ---------------------------------------------------------------------------
+# Data. KuaiRand-Pure is 194MB extracted (47GB with the 1k/27k variants) and is
+# a public download -- see README for the one-line wget. Never committed.
+# ---------------------------------------------------------------------------
+KuaiRand/
+*.tar.gz
+data/
+
+# Environments and caches
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+
+# Local tooling, not part of the submission
+.claude/
+SampleFolders/
+.loop_running.lock
+.module_backups/
+
+# Superseded / invalid work, kept locally for provenance but not shipped
+archive/invalid-run-2026-08-26/
+archive/run-2026-08-26-leaked/
+archive/run-2026-08-26-converged-early/
+archive/superseded-pipeline/
+docs/CLAUDE.md
+handoff/
+*.orig
+*.bak
+*.py.coder_bak
+
+# NOTE: the following are DELIBERATELY NOT ignored -- they are graded
+# deliverables and an earlier .gitignore silently excluded them:
+#   submission.csv        the final model output   (deliverable 4)
+#   workspace_run07/      latest run logs          (deliverable 3)
+#   archive/runs/         all prior run logs       (deliverable 3)
+
+# OS / editor cruft
+.DS_Store
+*.zip
