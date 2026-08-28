@@ -37,14 +37,10 @@ import pandas as pd
 
 from .dataset import FEEDBACK_COLUMNS, Split
 
-# Updated field list to include time-based features for context-awareness
-FIELDS = [
-    "user_id", "video_id", "author_id", "tab", "dur_bucket", 
-    "hour_bucket", "session_length"
-]
+# The official baseline's five fields.
+FIELDS = ["user_id", "video_id", "author_id", "tab", "dur_bucket"]
 
 N_DURATION_BUCKETS = 10
-N_HOUR_BUCKETS = 24  # For each hour of the day
 
 @dataclass
 class Encoded:
@@ -71,17 +67,12 @@ class FeatureState:
 def _raw_columns(split: Split, edges: np.ndarray) -> list[np.ndarray]:
     """Field values for every row, before vocabulary mapping."""
     log = split.log
-    # Calculate session length: difference between max and min time_ms per user-session
-    session_length = (log.groupby('user_id')['time_ms'].transform('max') -
-                      log.groupby('user_id')['time_ms'].transform('min')) / 1000  # in seconds
     return [
         log["user_id"].to_numpy(),
         log["video_id"].to_numpy(),
         log["author_id"].to_numpy(),
         log["tab"].to_numpy(),
         np.searchsorted(edges, log["duration_ms"].to_numpy().astype(np.float64)),
-        log["hourmin"].to_numpy() // 100,  # Hour bucket
-        session_length.to_numpy()  # Session length
     ]
 
 def fit(train: Split) -> FeatureState:
