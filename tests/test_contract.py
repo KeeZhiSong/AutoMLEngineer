@@ -448,6 +448,141 @@ def test_failure_classification():
     print("  failure classification OK (implementation/optimisation/scientific)")
 
 
+def test_exploit_branch_reachable():
+    """A win must NOT end the run on the cycle it happened.
+
+    Both winning runs converged the moment they improved (+0.0017 and +0.0014
+    against epsilon=0.002), because the rule asks whether improvement EXCEEDED
+    epsilon and a sub-epsilon win does not. That made the exploit branch
+    unreachable: the event that opens it was the event that stopped the loop.
+    """
+    import inspect
+    from agent import controller
+
+    src = inspect.getsource(controller.run_loop)
+    assert "not evaluated on a winning cycle" in src, \
+        "convergence is still evaluated on a winning cycle -- exploit unreachable"
+    assert "run_exploit" in src, "no exploit branch"
+
+    # and the rule itself still behaves: a sub-epsilon gain IS convergence
+    from solution.scoring import has_converged
+    assert has_converged([0.6014, 0.6031, 0.6031, 0.6031], has_improved=True)
+    print("  exploit branch reachable after a win OK")
+
+
+def test_exploit_branch_executes():
+    """Drive the REAL exploit code path with stubs -- no LLM, no training.
+
+    The branch fires only on a KEEP, and the one V5 run produced none, so this
+    code had never executed. Source-text checks were what let that hide; this
+    calls it. Numbers are the measured pointwise answer key: lr 3e-3 -> 0.6001,
+    1e-3 -> 0.6014, 3e-4 -> 0.6022.
+    """
+    from agent.exploiter import run_exploit
+
+    table = {3e-3: 0.6001, 1e-3: 0.6014, 3e-4: 0.6022}
+    seen, logged = [], []
+
+    def execute(cfg):
+        seen.append(cfg["lr"])
+        return {"status": "ok", "wall_seconds": 1.0,
+                "metrics": {"primary": table[cfg["lr"]], "GAUC": 0.0, "nDCG@5": 0.0}}
+
+    def plan(*_a, **_k):
+        return {"mode": "retune", "param": "lr", "values": [1e-3, 3e-4],
+                "reason": "step size stale after the intervention"}, 0
+
+    common = dict(execute=execute, log=lambda _s: None, plan_fn=plan)
+
+    out = run_exploit({}, None, None, {"seed": 0, "lr": 3e-3},
+                      best_primary=0.6001, keep_primary=0.6001,
+                      record=lambda **kw: logged.append(kw),
+                      time_left=lambda: True, **common)
+    assert seen == [1e-3, 3e-4], f"grid not applied in order: {seen}"
+    assert len(logged) == 2, "trials not written to the ledger"
+    assert out["checkpoint_cfg"]["lr"] == 3e-4, "did not adopt the best trial"
+    assert abs(out["best_primary"] - 0.6022) < 1e-9
+    assert out["run_cfg"]["lr"] == 3e-4, "winning config not carried out"
+    assert "lr sweep" in out.get("summary", ""), "no dose-response summary"
+
+    # a gain inside the accept band must NOT be adopted
+    out2 = run_exploit({}, None, None, {"seed": 0, "lr": 3e-3},
+                       best_primary=0.6018, keep_primary=0.6018,
+                       record=lambda **kw: None, time_left=lambda: True, **common)
+    assert out2["checkpoint_cfg"] is None, "adopted a gain inside the noise band"
+
+    # wall-clock exhaustion stops before the first trial
+    out3 = run_exploit({}, None, None, {"seed": 0, "lr": 3e-3},
+                       best_primary=0.6001, keep_primary=0.6001,
+                       record=lambda **kw: None, time_left=lambda: False, **common)
+    assert out3["checkpoint_cfg"] is None and out3["trials"] == [(3e-3, 0.6001)]
+
+    # the adopted value must not depend on the ORDER of the grid
+    def mk(order):
+        def _p(*_a, **_k):
+            return {"mode": "retune", "param": "lr", "values": order, "reason": ""}, 0
+        return _p
+    picks = set()
+    for order in ([1e-3, 3e-4], [3e-4, 1e-3]):
+        o = run_exploit({}, None, None, {"seed": 0, "lr": 3e-3},
+                        best_primary=0.6001, keep_primary=0.6001, execute=execute,
+                        record=lambda **kw: None, log=lambda _s: None,
+                        time_left=lambda: True, plan_fn=mk(order))
+        picks.add(o["checkpoint_cfg"]["lr"])
+    assert picks == {3e-4}, f"grid order changed the winner: {picks}"
+
+    # a crashed trial must not abort the branch
+    def flaky(cfg):
+        if cfg["lr"] == 1e-3:
+            return {"status": "crash", "metrics": {}}
+        return execute(cfg)
+    out4 = run_exploit({}, None, None, {"seed": 0, "lr": 3e-3},
+                       best_primary=0.6001, keep_primary=0.6001,
+                       record=lambda **kw: None, time_left=lambda: True,
+                       execute=flaky, log=lambda _s: None, plan_fn=plan)
+    assert out4["checkpoint_cfg"]["lr"] == 3e-4, "a crashed trial aborted the branch"
+    print("  exploit branch executes: grid, ledger, win, band, timeout, crash, order OK")
+
+
+def test_exploit_win_survives_the_next_cycle():
+    """A parameter the exploit stage tuned must still be in force next cycle.
+
+    It was not: run_cfg was rebuilt from the idea alone, so the tuned value was
+    dropped while `incumbent` kept the score it earned. Every later experiment
+    was then measured against a bar its own config could not reach.
+    """
+    from agent.controller import _compose_cfg
+
+    base = {"lr": 3e-4}                       # what an exploit win adopted
+    assert _compose_cfg(0, base, None)["lr"] == 3e-4, "tuned value dropped"
+    assert _compose_cfg(0, base, {"group_size": 5})["lr"] == 3e-4, \
+        "tuned value dropped when the idea set a different parameter"
+    assert _compose_cfg(0, base, {"lr": 1e-3})["lr"] == 1e-3, \
+        "an idea must still be able to set the parameter deliberately"
+    assert _compose_cfg(7, base, None)["seed"] == 7
+    print("  exploit-tuned parameters survive into later cycles OK")
+
+
+def test_exploiter_hardcodes_no_winning_values():
+    """The exploiter must search, not recall.
+
+    It tunes generic parameter NAMES over candidate grids; it must not contain
+    the values a human found (lr 2e-4, group_size 5), or a 'clean' run would be
+    handed the answer.
+    """
+    from agent import exploiter
+
+    src = (ROOT / "agent" / "exploiter.py").read_text()
+    for banned in ("2e-4", "0.0002", "0.6038", "0.6031"):
+        assert banned not in src, f"exploiter contains a known answer: {banned}"
+
+    # grids must straddle, not point at, an answer
+    assert len(exploiter.TUNABLE["lr"]) >= 4
+    assert len(exploiter.TUNABLE["group_size"]) >= 3
+    assert exploiter.MAX_TRIALS <= 5, "an exploit branch must stay cheap"
+    print("  exploiter searches rather than recalls OK")
+
+
 if __name__ == "__main__":
     import argparse
 
@@ -468,6 +603,10 @@ if __name__ == "__main__":
     test_contract_targets_cover_loss_changes()
     test_changed_op_verifies_intervention_not_direction()
     test_failure_classification()
+    test_exploit_branch_reachable()
+    test_exploit_branch_executes()
+    test_exploit_win_survives_the_next_cycle()
+    test_exploiter_hardcodes_no_winning_values()
     test_leakcheck_catches_the_real_leak()
     test_leakcheck_allows_train_only_target_encoding()
     test_implausible_gain_threshold()

@@ -59,7 +59,8 @@ solution/
   train.py    AGENT-EDITABLE  ─┘
   eda.py      FROZEN. 9 dataset-inspection tools. Neutral numbers, no
               interpretation — a tool that flags a finding leaks the answer.
-agent/        analyst → classifier → inventor → coder → reflector
+agent/        analyst → classifier → inventor → specifier → coder
+              → reflector → exploiter (on a keep only)
 lib/          techniques.jsonl + beliefs.py (claims WITH contradicting evidence)
 tests/        contract tests for the silent-failure cases
 workspace/    experiments.jsonl, INSIGHTS.md, DEAD_ENDS.md, summary.json
@@ -76,15 +77,23 @@ workspace/    experiments.jsonl, INSIGHTS.md, DEAD_ENDS.md, summary.json
    push — retrieval after invention informs a hypothesis the agent already owns.
 4. **Coder** rewrites exactly one module. Syntax-, import- and leak-checked
    before it is allowed to cost a training run.
-5. **Reflector** decides keep/revert **arithmetically** — only if primary beats
+5. **Specifier** writes a semantic contract *before the code exists* — a handful
+   of measurable claims about what the patch must change. `instrument.py` checks
+   them in 0.4s without training, so a patch that changes nothing never costs a
+   run.
+6. **Reflector** decides keep/revert **arithmetically** — only if primary beats
    the incumbent by more than one published std (0.0008). The LLM writes the
    explanation, never the verdict.
+7. **Exploiter** (on a keep only) spends up to 4 trials retuning a parameter the
+   new objective made stale, or dosing the intervention's strength to tell a
+   plateau from a lucky point. Built and unit-tested; **not yet exercised on a
+   live win.**
 
 Guards, each added because something got past the previous set:
 
 | guard | what it caught |
 |---|---|
-| AST leak scan (pre-execution) | 5 attempts to read a feedback column as an input |
+| AST leak scan (pre-execution) | 11 attempts to read a feedback column as an input, across 8 runs |
 | row-count invariant | a patch that padded the scored set 124,909 → 451,647 rows |
 | 5-seed tie-break | a "win" that averaged back to baseline over five seeds |
 | implausible-gain flag | any single-cycle jump > 0.02 of a 0.247 total headroom |
@@ -111,25 +120,42 @@ The baseline is reproduced to within the published seed variance:
 | ours, valid | 0.6670 | 0.5358 | **0.6014** | 0.6016 |
 | ours, test | 0.6621 | 0.5286 | **0.5953** | 0.5946 |
 
-**Best result: valid primary 0.6034 (seed 0), 0.6028 over 5 seeds — +0.0012
-over the baseline.** Listwise softmax with evaluation-length training groups.
-Against a matched control that is +0.0025 with a paired t of 11.3 on 4 df, all
-five seeds positive and complete separation; it also held across four separate
-temporal windows (14/14 paired seeds). `submission.csv` is generated from this
-config and passes the organisers' own checker.
+**Submitted result: valid primary 0.6038 over 5 seeds — +0.0022 over the
+baseline.** Listwise softmax with evaluation-length training groups (+0.0012),
+plus a learning rate retuned for that new objective (+0.0010; the inherited 1e-3
+had been tuned for a pointwise loss). Against a matched control the paired t is
+11.3 on 4 df, all five seeds positive, complete separation; the grouping effect
+also held across four separate temporal windows (14/14 paired seeds).
+`submission.csv` is generated from this config and passes the organisers' checker.
+
+**The agent independently reaches 0.6031** from a 0.6014 reference, with no
+answers in its technique library, 5-seed confirmed in-loop, zero manual
+interventions — by a different route (a reweighted logloss). It does so on
+**3 of 5 architecture-V4/V5 runs**; the three generations before that produced
+zero improvements in 70+ cycles.
 
 The test split has been scored **zero** times — the CSV holds test predictions,
 but the test metric is deliberately withheld until the config is final.
 
 ## Limitations
 
-- **The +0.0012 was found by a human diagnostic, not by the agent.** The agent
-  independently *names* the right problem from its own measurements; it has not
-  yet converted that diagnosis into code that beats the reference. Both halves
-  belong in any honest description of this system.
-- The margin is thin: +0.0012 is ~3.0 standard errors once the baseline's own
+- **Two results, two authors, and the difference matters.** The 0.6038 came from
+  a human diagnostic. The 0.6031 came from the agent unaided. Both belong in any
+  honest description of this system, and neither should be reported as the other.
+- **It does not improve every run.** 3 of 5. The difference between a winning run
+  and a losing one appears to be how ambitious an intervention the LLM happens to
+  choose: runs that attempt transformers or adversarial training fail to
+  implement them correctly in numpy; the run that attempted a reweighted loss
+  succeeded. That is sampling variance in a real component, not measurement noise.
+- **The V5 EXPLOIT stage has never fired.** It triggers on a keep, and the one
+  run under V5 produced none. It is unit-tested and unvalidated.
+- The margin is thin: +0.0022 is ~3.0 standard errors once the baseline's own
   0.0008 seed variance is propagated, not the 6.8 it looks like if you treat the
   published number as exact.
+- **Four independent stacking routes are closed by measurement** — the confirmed
+  effects compose to roughly the max of the parts, not the sum, because they are
+  reading the same item-quality signal. Practical ceiling looks like ~0.604
+  against an oracle of 0.8484.
 - The convergence rule is gated on having accepted one improvement first; a
   literal reading ends any non-improving search at exactly 3 iterations. This is
   our interpretation, documented in `solution/scoring.py`.
@@ -160,6 +186,7 @@ Model ids beginning `claude-` route to Anthropic automatically (needs
 in `summary.json` under `tokens_by_role`, alongside the routing actually used.
 
 Measured so far: `gpt-4o-mini` cannot write a correct grouped gradient at all.
-`gpt-4o` names the right problem in 11 of 16 scored cycles and 0 of 16 of its
-implementations cleared the accept margin — so implementation, not diagnosis, is
-where a stronger model would pay.
+`gpt-4o` names the right problem far more often than it implements one — across
+V4/V5 runs it produced 3 accepted improvements from 32 trained experiments, with
+34 more blocked before training by contract or leak checks. Implementation, not
+diagnosis, is where a stronger coder model would pay.

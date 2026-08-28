@@ -50,6 +50,7 @@ from .specifier import check as check_contract       # noqa: E402
 from .specifier import specify                       # noqa: E402
 from .inventor import invent                         # noqa: E402
 from .coder import apply_code_patch                  # noqa: E402
+from .exploiter import run_exploit                    # noqa: E402
 from .ideator import (                               # noqa: E402
     MAX_REVISIONS, PROMISING_GAP, propose_idea, propose_revision,
 )
@@ -132,6 +133,19 @@ def _restore_module(name: str) -> bool:
 def _accept_module(name: str) -> None:
     """Promote the current file to be the new revert target."""
     shutil.copy2(EDITABLE / name, BACKUP_DIR / name)
+
+
+def _compose_cfg(seed: int, base_cfg: dict, idea_cfg: dict | None) -> dict:
+    """Training config for a cycle: seed, then parameters an EXPLOIT win tuned,
+    then whatever the idea sets explicitly.
+
+    base_cfg exists because the next cycle used to rebuild the config from the
+    idea alone, dropping a tuned value while `incumbent` kept the score that
+    value earned -- so every later experiment was judged against a bar its own
+    config could not reach. The idea still wins, so the agent can set a
+    parameter deliberately.
+    """
+    return {"seed": seed, **base_cfg, **(idea_cfg or {})}
 
 
 def _execute(data_dir: str, cfg: dict, seed: int, incumbent: float) -> dict:
@@ -255,6 +269,7 @@ def run_loop(data_dir: str,
     # improvement -- until it has, the run is still searching.
     has_accepted_improvement = False
     best_checkpoint: dict | None = None
+    base_cfg: dict = {}
     candidate: dict | None = None      # a near miss being revised
     stop_reason = "max_iterations"
 
@@ -377,7 +392,7 @@ def run_loop(data_dir: str,
             continue
 
         # --- 2b. VERIFY SEMANTICS: did the patch do what it claimed? -----
-        run_cfg = {"seed": seed, **(idea.get("config") or {})}
+        run_cfg = _compose_cfg(seed, base_cfg, idea.get("config"))
         verdict = None
         if contract:
             instrument.invalidate_cache()          # the patch may re-encode
@@ -463,12 +478,49 @@ def run_loop(data_dir: str,
             _accept_module(module)
             best_primary = metrics["primary"]
             best_checkpoint = {"cycle": cycle, "metrics": metrics,
-                               "idea": idea, "module": module}
+                               "idea": idea, "module": module, "config": run_cfg}
             has_accepted_improvement = True
             instrument.invalidate_cache()          # features.py may have changed
             baseline_instr = instrument.measure(ds_for_eda, {"seed": seed})
             candidate = None                     # accepted: nothing left to revise
             logger.info(f"  KEEP  -> new best primary {best_primary:.4f}")
+
+            # ---- EXPLOIT: a win is a new local research problem ----------
+            # V4 stopped here and went back to open exploration. But the human
+            # gain of +0.0012 from a structural change was followed by +0.0010
+            # more from retuning the step size FOR that change -- a parameter
+            # stale only because the intervention altered the gradient scale.
+            # This works that branch before returning to exploration.
+            try:
+                ex = run_exploit(
+                    idea, contract, realised if contract else None, run_cfg,
+                    best_primary=best_primary,
+                    keep_primary=metrics["primary"],
+                    execute=lambda c: _execute(data_dir, c, seed, best_primary),
+                    record=lambda **kw: led.record(
+                        cycle=cycle,
+                        source_technique=idea.get("source_technique", ""),
+                        stage="exploit", module_changed=module or "",
+                        status="ok", data_scale="full",
+                        manual_intervention=False, **kw),
+                    log=logger.info,
+                    time_left=lambda: time.time() - started <= wall_clock_seconds,
+                    llm_model=llm_model)
+                tokens_used += ex["tokens"]
+                if ex["checkpoint_cfg"] is not None:
+                    best_primary = ex["best_primary"]
+                    run_cfg = ex["run_cfg"]
+                    base_cfg = {k: v for k, v in ex["run_cfg"].items()
+                                if k != "seed"}
+                    best_checkpoint = {"cycle": cycle, "metrics": {"primary": best_primary},
+                                       "idea": idea, "module": module,
+                                       "config": ex["checkpoint_cfg"]}
+                if ex.get("summary"):
+                    logger.info(f"    {ex['summary']}")
+                    jour.add_insight(f"[cycle {cycle}] {ex['summary']}")
+                    primary_history.append(best_primary)
+            except Exception as exc:               # noqa: BLE001
+                logger.warning(f"  exploit branch failed ({exc}); continuing")
         else:
             gap = incumbent - metrics.get("primary", -99)
             promising = status == "ok" and 0 <= gap < PROMISING_GAP
@@ -523,8 +575,15 @@ def run_loop(data_dir: str,
         )
 
         # --- Convergence (organisers' rule) ------------------------------
-        if has_converged(primary_history,
-                         has_improved=has_accepted_improvement):
+        # A win of less than epsilon used to END the run on the cycle it
+        # succeeded -- both winning runs converged the moment they improved
+        # (+0.0017 and +0.0014, against epsilon=0.002). That makes the exploit
+        # branch unreachable: the event that opens it is the event that stops
+        # the loop. Convergence is therefore not evaluated on a winning cycle.
+        if keep:
+            logger.info("  (convergence not evaluated on a winning cycle)")
+        elif has_converged(primary_history,
+                           has_improved=has_accepted_improvement):
             stop_reason = "converged"
             logger.info(f"CONVERGED: validation primary has not improved by "
                         f">{EPSILON} over the last {N_CONSECUTIVE} iterations.")
