@@ -1,0 +1,38 @@
+{
+  "stop_reason": "token_budget",
+  "cycles": 21,
+  "wall_seconds": 1570.9,
+  "start_primary": 0.601384162902832,
+  "best_primary": 0.601384162902832,
+  "improvement_over_start": 0.0,
+  "beat_baseline": 0.0,
+  "baseline_primary": 0.6016,
+  "delta_vs_baseline": -0.00019999999494757503,
+  "submission_checkpoint": "agent-best",
+  "best_checkpoint": null,
+  "primary_history": [
+    0.6016379594802856,
+    0.5859066247940063,
+    0.6001420021057129,
+    0.5987472534179688,
+    0.5977345705032349
+  ],
+  "tokens_by_role": {
+    "analyst": 26611,
+    "classifier": 67618,
+    "inventor": 90011,
+    "coder": 120598,
+    "reflector": 1752
+  },
+  "model_routing": {
+    "analyst": "gpt-4o-mini",
+    "classifier": "gpt-4o",
+    "inventor": "gpt-4o",
+    "coder": "gpt-4o",
+    "reflector": "gpt-4o-mini"
+  },
+  "tokens_in": 306590,
+  "tokens_out": 0,
+  "gpu_hours": 0.066,
+  "manual_interventions": 0
+}

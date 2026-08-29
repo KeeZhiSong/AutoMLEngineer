@@ -1,0 +1,4 @@
+# Insights
+
+- [2026-08-28 23:15] [cycle 18] temporal-decay-weights on features.py: The incorporation of a temporal decay function successfully enhanced the model's ability to capture dynamic user preferences by giving more weight to recent interactions, which likely improved the ranking of impressions for unseen users. The slight increase in primary score suggests that refining how interactions are considered over time can lead to more effective recommendations. For the next iteration, further tuning of the temporal decay parameters and experimenting with additional features that account for user context may yield even greater improvements in performance.
+- [2026-08-28 23:25] [cycle 18] lr sweep: 0.001:0.6022 3e-05:0.5942 0.0001:0.6012 0.0003:0.6022 0.003:0.6004 | best 0.0003 at 0.6022 vs incumbent 0.6022  (peaked -- treat the optimum with suspicion)
