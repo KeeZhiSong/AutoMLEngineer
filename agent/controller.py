@@ -50,6 +50,9 @@ from .specifier import check as check_contract       # noqa: E402
 from .specifier import specify                       # noqa: E402
 from .inventor import invent                         # noqa: E402
 from .coder import apply_code_patch                  # noqa: E402
+from .anomalies import AnomalyBoard                   # noqa: E402
+from .capabilities import capability_map, validate_config  # noqa: E402
+from .planner import plan_implementations             # noqa: E402
 from .exploiter import run_exploit                    # noqa: E402
 from .ideator import (                               # noqa: E402
     MAX_REVISIONS, PROMISING_GAP, propose_idea, propose_revision,
@@ -220,6 +223,8 @@ def run_loop(data_dir: str,
     led = ledger_module.ExperimentLedger(workspace)
     jour = ledger_module.Journal(workspace)
     beliefs = BeliefStore(workspace)
+    board = AnomalyBoard(workspace)
+    caps = capability_map()
 
     _snapshot_modules()
 
@@ -270,6 +275,7 @@ def run_loop(data_dir: str,
     has_accepted_improvement = False
     best_checkpoint: dict | None = None
     base_cfg: dict = {}
+    seen_tools: set = set()
     candidate: dict | None = None      # a near miss being revised
     stop_reason = "max_iterations"
 
@@ -299,7 +305,10 @@ def run_loop(data_dir: str,
         revising = bool(candidate and candidate["attempts"] < MAX_REVISIONS)
         if not revising:
             try:
-                obs_record, obs_tokens = observe(ds_for_eda, led, jour, model=llm_model)
+                obs_record, obs_tokens = observe(
+                    ds_for_eda, led, jour, model=llm_model,
+                    cycle=cycle - 1, seen_tools=seen_tools)
+                seen_tools.update((obs_record or {}).get('tools_run', []))
                 tokens_used += obs_tokens
                 observations = obs_record
             except Exception as exc:                   # noqa: BLE001
@@ -331,8 +340,10 @@ def run_loop(data_dir: str,
                                manual_intervention=False)
                     candidate = None
                     continue
+                problem_ids = board.observe(problems, cycle)
                 idea, inv_tokens = invent(problems, beliefs=beliefs, led=led,
-                                          model=llm_model)
+                                          model=llm_model, board=board,
+                                          problem_ids=problem_ids)
                 idea_tokens += inv_tokens
                 candidate = None
             else:
@@ -357,6 +368,38 @@ def run_loop(data_dir: str,
                        recovered=True, manual_intervention=False)
             jour.add_dead_end(f"Ideator crash: {str(exc)[:180]}")
             continue
+
+        # --- 1a2. PLAN: search IMPLEMENTATIONS, not just hypotheses ------
+        # The loop already searched ideas. It never searched ways to realise
+        # one, and that is where run 11 lost: four correct diagnoses, a direct
+        # candidate present each time, an elaborate option chosen each time,
+        # nothing measurable changed. Scoring is biased toward the smallest
+        # edit that moves a quantity instrument.py can see.
+        if pipeline == "classify" and idea.get("problem"):
+            try:
+                chosen, plans, plan_tokens = plan_implementations(
+                    idea, idea["problem"], sorted(baseline_instr.keys()),
+                    model=llm_model, capabilities=caps)
+                tokens_used += plan_tokens
+                idea_tokens += plan_tokens
+                if chosen:
+                    idea["implementation"] = chosen
+                    idea["hypothesis"] = (
+                        f"{idea['hypothesis']} "
+                        f"[implementation: {chosen.get('how','')}]")
+                    # Config that ACTIVATES the code change is part of the same
+                    # intervention. Some paths are inert without it -- grouping
+                    # does nothing under batch_mode="row" -- so splitting them
+                    # produces two cycles that each measure nothing.
+                    if isinstance(chosen.get("config"), dict) and chosen["config"]:
+                        ok, bad = validate_config(chosen["config"])
+                        if bad:
+                            logger.info(f"    rejected activation config: {bad}")
+                        if ok:
+                            idea["config"] = {**(idea.get("config") or {}), **ok}
+                            logger.info(f"    activation config: {ok}")
+            except Exception as exc:               # noqa: BLE001
+                logger.warning(f"planner failed ({exc}); coding from the idea alone")
 
         # --- 1b. SPECIFY: fix the contract BEFORE the code exists --------
         # Written from the NAMED PROBLEM, not from the implementation. If the
@@ -427,11 +470,20 @@ def run_loop(data_dir: str,
                     f"[cycle {cycle}] IMPLEMENTATION failure (not a scientific "
                     f"one): {idea.get('source_technique','?')} — "
                     f"{verdict['failures'][0][:120]}")
+                board.record_attempt(cycle, idea.get("source_technique", "?"),
+                                     faithful=False, outcome="no-op",
+                                     anomaly_id=idea.get("_anomaly_id"))
                 _restore_module(module)
                 continue
 
         incumbent = best_primary if best_primary > 0 else BASELINE["valid"]["primary"]
         result = _execute(data_dir, run_cfg, seed, incumbent)
+        board.record_attempt(
+            cycle, idea.get("source_technique", "?"),
+            faithful=(contract is None or (verdict or {}).get("satisfied", False)),
+            outcome=(f"{result['metrics']['primary']:.4f}"
+                     if result["status"] == "ok" else result["status"]),
+            anomaly_id=idea.get("_anomaly_id"))
         status = result["status"]
         metrics = result.get("metrics", {})
         error = result.get("error", "")
