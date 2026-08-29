@@ -671,84 +671,6 @@ def test_grouping_postcondition_dropped_when_unreachable():
     print("  contracts cannot forbid or over-reach their own intervention OK")
 
 
-def test_inert_grouping_plan_is_disqualified():
-    """Grouping under a non-grouped objective is a measured no-op -- reject it.
-
-    The trap is that it LOOKS like a clean test: `train_group_size_median`
-    genuinely moves once batch_mode="user" is set, so the contract passes, the
-    run scores baseline, and the result is filed as SCIENTIFIC failure --
-    evidence against the correct hypothesis. Handoff 04 5b measured the no-op.
-
-    Found offline: with the capability map stating the objective is not grouped,
-    the planner still chose a grouping-only plan at 5.00 in 3/3 trials, because
-    `capability` rewards using what already exists and a new objective scores low
-    on it. Stating the fact was not enough; it has to be enforced.
-    """
-    from agent.planner import _inert_grouping, score_plan
-
-    caps_pointwise = ("`pointwise_logloss` does NOT take `user_id` ... it "
-                      "is NOT a grouped objective.")
-    grouping_only = {"name": "Match Group Size", "how": "set batch_mode and group_size",
-                     "control_point": "train.py::user_batches",
-                     "config": {"batch_mode": "user", "group_size": 4},
-                     "directness": 5, "capability": 5, "fidelity": 5,
-                     "isolation": 5, "cheapness": 5}
-    assert _inert_grouping(grouping_only, caps_pointwise), \
-        "a grouping-only plan under a pointwise objective must be disqualified"
-
-    complete = {**grouping_only, "name": "Listwise + eval-sized groups",
-                "how": "replace the objective with a listwise loss over each "
-                       "user's list and set the grouping config"}
-    assert not _inert_grouping(complete, caps_pointwise), \
-        "a plan that changes the objective AND the grouping is legitimate"
-
-    # once the objective is already grouped, grouping plans are fine again
-    assert not _inert_grouping(grouping_only, "the objective is `listwise` and takes user_id")
-
-    grouping_only["fidelity"] = 1          # what the disqualification sets
-    assert score_plan(grouping_only) == 0.0
-    print("  inert grouping-under-pointwise plans disqualified OK")
-
-
-def test_capability_map_links_gated_keys():
-    """A key that only works with another must say so.
-
-    Run 15, real: the planner set `group_size` in one plan and
-    `batch_mode="user"` in another. Neither did anything -- `group_size` is read
-    only inside the `batch_mode == "user"` branch. The map listed both keys and
-    never linked them, so the agent had both facts and no relationship.
-    """
-    from agent.capabilities import capability_map
-
-    m = capability_map()
-    assert "read ONLY when" in m, "gated keys are not surfaced"
-    assert "group_size" in m and 'batch_mode == "user"' in m
-    gated = [l for l in m.splitlines() if "read ONLY when" in l]
-    assert any("group_size" in l for l in gated), \
-        "the group_size/batch_mode dependency is not stated"
-
-
-def test_activation_config_is_validated():
-    """Config from a plan must be checked against what the code actually reads.
-
-    Run 15 emitted `{"loss_function": "focal_loss"}` -- no module reads it -- and
-    `{"group_size": "config_value"}`, an LLM placeholder where an int belongs,
-    which cost one cycle 16 minutes before failing. Both reached run_cfg because
-    the merge was unvalidated.
-    """
-    from agent.capabilities import validate_config
-
-    kept, dropped = validate_config({"loss_function": "focal_loss"})
-    assert kept == {} and dropped, "unknown config key was accepted"
-
-    kept, dropped = validate_config({"group_size": "config_value"})
-    assert kept == {} and dropped, "placeholder string accepted for an int key"
-
-    kept, dropped = validate_config({"group_size": 5, "batch_mode": "user"})
-    assert kept == {"group_size": 5, "batch_mode": "user"} and not dropped, \
-        "a legitimate compound activation config was rejected"
-    print("  capability map links gated keys, activation config validated OK")
-
 
 def test_cascade_is_mechanism_conditioned():
     """After a win, WHAT became stale depends on what actually changed.
@@ -845,59 +767,21 @@ def test_planner_prefers_the_minimal_implementation():
     """
     from agent.planner import score_plan
 
-    minimal = {"directness": 5, "capability": 5, "fidelity": 5,
-               "isolation": 5, "cheapness": 5}
-    middling = {"directness": 3, "capability": 3, "fidelity": 4,
-                "isolation": 4, "cheapness": 4}
-    elaborate = {"directness": 2, "capability": 2, "fidelity": 2,
-                 "isolation": 2, "cheapness": 2}
+    minimal = {"directness": 5, "fidelity": 5, "isolation": 5, "cheapness": 5}
+    middling = {"directness": 3, "fidelity": 4, "isolation": 4, "cheapness": 4}
+    elaborate = {"directness": 2, "fidelity": 2, "isolation": 2, "cheapness": 2}
     assert score_plan(minimal) > score_plan(middling) > score_plan(elaborate)
 
     # a plan that cannot name the quantity it moves must lose to one that can,
     # even when it looks more direct -- no-ops are the dominant failure
-    vague = {"directness": 5, "capability": 5, "fidelity": 1,
-             "isolation": 5, "cheapness": 5}
-    concrete = {"directness": 3, "capability": 3, "fidelity": 5,
-                "isolation": 3, "cheapness": 3}
+    vague = {"directness": 5, "fidelity": 1, "isolation": 5, "cheapness": 5}
+    concrete = {"directness": 3, "fidelity": 5, "isolation": 3, "cheapness": 3}
     assert score_plan(vague) == 0.0, \
         "a plan naming no measurable quantity cannot be contracted -- disqualify it"
     assert score_plan(concrete) > 0
 
-    # THE run 12 CASE. Re-batching was ranked LAST (2.75) because the model
-    # judged it invasive and expensive, not knowing eval_sized_groups(),
-    # user_batches(group_size=) and the batch_mode switch already exist.
-    # Priced with that knowledge it must beat the indirect reweighting.
-    rebatch_blind = {"directness": 3, "capability": 2, "fidelity": 3,
-                     "isolation": 2, "cheapness": 2}
-    rebatch_informed = {"directness": 5, "capability": 5, "fidelity": 5,
-                        "isolation": 4, "cheapness": 4}
-    weighted_loss = {"directness": 2, "capability": 3, "fidelity": 4,
-                     "isolation": 5, "cheapness": 4}
-    assert score_plan(rebatch_blind) < score_plan(weighted_loss), \
-        "this is the run 12 failure -- blind pricing loses to the indirect fix"
-    assert score_plan(rebatch_informed) > score_plan(weighted_loss), \
-        "capability-aware pricing must reverse it"
-    print("  planner prices the direct fix correctly once capabilities are known OK")
+    print("  planner prefers the minimal, verifiable implementation OK")
 
-
-def test_capability_map_is_factual_and_leaks_nothing():
-    """The map must describe the code, never the answer.
-
-    It exists because run 12 priced a config-level change as invasive surgery.
-    It must surface that `eval_sized_groups` and the `batch_mode` switch exist,
-    while containing no tuned value -- the parameter NAME is a fact about the
-    code, the value 5 is the answer.
-    """
-    from agent.capabilities import capability_map
-
-    m = capability_map()
-    assert "eval_sized_groups" in m, "the map misses existing grouping machinery"
-    assert "batch_mode" in m, "the map misses the config switch"
-    assert 'batch_mode == "user"' in m, "config-selected branches must be surfaced"
-    for banned in ("group_size=5", "group_size = 5", "2e-4", "0.0002", "0.6038",
-                   "0.6031", "listwise softmax is best"):
-        assert banned not in m, f"capability map leaks an answer: {banned}"
-    print("  capability map is factual and leaks no answer OK")
 
 
 def test_exploiter_hardcodes_no_winning_values():
@@ -951,10 +835,6 @@ if __name__ == "__main__":
     test_observe_coverage_reaches_the_decisive_tools()
     test_anomaly_board_remembers_across_cycles()
     test_planner_prefers_the_minimal_implementation()
-    test_capability_map_is_factual_and_leaks_nothing()
-    test_inert_grouping_plan_is_disqualified()
-    test_capability_map_links_gated_keys()
-    test_activation_config_is_validated()
     test_exploiter_hardcodes_no_winning_values()
     test_leakcheck_catches_the_real_leak()
     test_leakcheck_allows_train_only_target_encoding()

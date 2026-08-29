@@ -166,28 +166,9 @@ def sanitise_contract(c: dict, config: dict | None = None) -> dict:
 def specify(idea: dict, problem: dict, before: dict,
             model: str = "gpt-4o") -> tuple[dict, int]:
     """Produce the semantic contract for an intervention. Returns (contract, tokens)."""
-    # The contract is still written BEFORE the code exists -- that is what stops
-    # the coder authoring a gate its own patch satisfies. But it must target what
-    # the CHOSEN IMPLEMENTATION claims to move, not merely what the problem is
-    # about. In run V8 the specifier wrote grouping postconditions while the
-    # planner had chosen a reweighting plan; the unreachable-target guard then
-    # dropped them, leaving an EMPTY contract, and three of six cycles trained
-    # with no semantic gate at all. A mis-targeted contract became no contract.
-    impl = idea.get("implementation") or {}
-    impl_block = ""
-    if impl:
-        impl_block = f"""
-THE IMPLEMENTATION THAT WAS CHOSEN (target YOUR postconditions at THIS)
-  {impl.get('name','')}: {impl.get('how','')}
-  it claims to move: {impl.get('moves_quantity','(unstated)')}
-  activation config:  {impl.get('config') or '{}'}
-A postcondition that this implementation cannot move is useless -- it will be
-dropped and you will have gated nothing.
-"""
-
     prompt = f"""You are about to implement an intervention. BEFORE writing any
 code, state what it must measurably CAUSE.
-{impl_block}
+
 THE PROBLEM (named independently from measurements)
   {problem.get('statement','')}
   dimension: {problem.get('dimension','')}
@@ -282,16 +263,6 @@ Return ONLY JSON:
 
     # Drop postconditions the patch cannot possibly satisfy.
     c = sanitise_contract(c, idea.get("config"))
-    if not c["postconditions"] and (idea.get("implementation") or {}).get("moves_quantity"):
-        # Last resort before running blind: gate on `changed` for any measurable
-        # quantity the chosen implementation itself named.
-        for m in CONTROLLABLE:
-            if m in str(impl.get("moves_quantity", "")):
-                c["postconditions"] = [{"metric": m, "op": "changed"}]
-                logger.info(f"    contract re-targeted at the implementation's "
-                            f"own claimed quantity: {m} changed")
-                break
-
     if not c["postconditions"]:
         logger.warning("    contract has no satisfiable postcondition; "
                        "semantic gate disabled for this cycle")

@@ -51,7 +51,6 @@ from .specifier import specify                       # noqa: E402
 from .inventor import invent                         # noqa: E402
 from .coder import apply_code_patch                  # noqa: E402
 from .anomalies import AnomalyBoard                   # noqa: E402
-from .capabilities import capability_map, validate_config  # noqa: E402
 from .planner import plan_implementations             # noqa: E402
 from .exploiter import run_exploit                    # noqa: E402
 from .ideator import (                               # noqa: E402
@@ -224,7 +223,6 @@ def run_loop(data_dir: str,
     jour = ledger_module.Journal(workspace)
     beliefs = BeliefStore(workspace)
     board = AnomalyBoard(workspace)
-    caps = capability_map()
 
     _snapshot_modules()
 
@@ -379,7 +377,7 @@ def run_loop(data_dir: str,
             try:
                 chosen, plans, plan_tokens = plan_implementations(
                     idea, idea["problem"], sorted(baseline_instr.keys()),
-                    model=llm_model, capabilities=caps)
+                    model=llm_model)
                 tokens_used += plan_tokens
                 idea_tokens += plan_tokens
                 if chosen:
@@ -387,17 +385,6 @@ def run_loop(data_dir: str,
                     idea["hypothesis"] = (
                         f"{idea['hypothesis']} "
                         f"[implementation: {chosen.get('how','')}]")
-                    # Config that ACTIVATES the code change is part of the same
-                    # intervention. Some paths are inert without it -- grouping
-                    # does nothing under batch_mode="row" -- so splitting them
-                    # produces two cycles that each measure nothing.
-                    if isinstance(chosen.get("config"), dict) and chosen["config"]:
-                        ok, bad = validate_config(chosen["config"])
-                        if bad:
-                            logger.info(f"    rejected activation config: {bad}")
-                        if ok:
-                            idea["config"] = {**(idea.get("config") or {}), **ok}
-                            logger.info(f"    activation config: {ok}")
             except Exception as exc:               # noqa: BLE001
                 logger.warning(f"planner failed ({exc}); coding from the idea alone")
 
