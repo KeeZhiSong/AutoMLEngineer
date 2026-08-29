@@ -82,12 +82,112 @@ MANDATORY_INVARIANTS = [
 ]
 
 
+def sanitise_contract(c: dict, config: dict | None = None) -> dict:
+    """Drop unsatisfiable postconditions and contradictory invariants.
+
+    Extracted so it can be CALLED in a test. Inline it needed an LLM round
+    trip to reach, which is how the contradictory-invariant defect survived
+    until it cost run 13 three of its best plans."""
+    # Grouping metrics are inert unless the run asks for user batching.
+    #
+    # MEASURED, run 13: four cycles were blocked on
+    # `train_group_size_median changed 1.0 -> got 1.0`. Under the reference
+    # `batch_mode="row"` the median IS 1.0 by construction and
+    # eval_sized_groups() is never called, so NO edit to train.py alone can move
+    # it. The contract was unsatisfiable before the coder wrote a line, and the
+    # experiment never ran. Treat it like FIXED_BY_DATA: drop the postcondition
+    # and let the cycle be measured, rather than block on an impossible target.
+    grouping_inert = str((config or {}).get("batch_mode", "row")) != "user"
+    GROUPING = {"train_group_size_median", "train_group_size_mean",
+                "pct_rows_in_mixed_label_group", "unique_users_per_batch"}
+
+    kept, dropped, unreachable = [], [], []
+    for pc in c.get("postconditions", []):
+        if pc.get("metric") in GROUPING and grouping_inert:
+            unreachable.append(pc["metric"])
+        elif pc.get("metric") in CONTROLLABLE and pc.get("op") in OPS:
+            kept.append(pc)
+        elif pc.get("metric") in FIXED_BY_DATA:
+            dropped.append(pc["metric"])
+    if unreachable:
+        logger.info(f"    dropped postconditions on {unreachable}: grouping is "
+                    f"inert under batch_mode='row', so no patch can move them")
+    if dropped:
+        logger.info(f"    dropped unsatisfiable postconditions on {dropped} "
+                    f"(fixed by the data, not by the patch)")
+    c["postconditions"] = kept[:MAX_POSTCONDITIONS]
+    # An invariant must not forbid what the intervention is FOR.
+    #
+    # MEASURED, run 13: three of the highest-scoring plans of the run were
+    # blocked by `embedding_dim_total unchanged` / `model_n_params unchanged`
+    # while the idea was "add a list-length feature" -- adding a field
+    # necessarily adds embeddings. One was rejected for moving
+    # embedding_dim_total by ONE (40260 -> 40261). The gate forbade exactly the
+    # thing being tested, and contract satisfaction fell to 25%.
+    #
+    # Anything a postcondition requires to change, and anything that moves
+    # mechanically WITH it, cannot also be pinned.
+    COUPLED = {
+        "n_feature_fields": {"embedding_dim_total", "model_n_params", "model_k"},
+        "embedding_dim_total": {"n_feature_fields", "model_n_params"},
+        "model_k": {"model_n_params", "embedding_dim_total"},
+        "model_type": {"model_n_params", "embedding_dim_total", "model_k"},
+        "loss_fn_name": {"initial_loss", "grad_dz_absmean", "grad_dz_nonzero_pct"},
+        "train_group_size_median": {"train_group_size_mean",
+                                    "optimiser_steps_per_epoch",
+                                    "unique_users_per_batch",
+                                    "pct_rows_in_mixed_label_group"},
+    }
+    forbidden = {pc["metric"] for pc in c["postconditions"]}
+    for m in list(forbidden):
+        forbidden |= COUPLED.get(m, set())
+
+    invs, contradictory = [], []
+    for i in c.get("invariants", []):
+        if i.get("metric") not in MEASURABLE or i.get("op") not in OPS:
+            continue
+        if i["metric"] in forbidden:
+            contradictory.append(i["metric"])
+            continue
+        invs.append(i)
+    if contradictory:
+        logger.info(f"    dropped invariants that contradict the intervention: "
+                    f"{contradictory}")
+    c["invariants"] = invs[:MAX_INVARIANTS]
+    # The mandatory ones are not the agent's to negotiate.
+    have = {(i["metric"], i["op"]) for i in c["invariants"]}
+    for m in MANDATORY_INVARIANTS:
+        if (m["metric"], m["op"]) not in have:
+            c["invariants"].append(dict(m))
+
+    return c
+
+
 def specify(idea: dict, problem: dict, before: dict,
             model: str = "gpt-4o") -> tuple[dict, int]:
     """Produce the semantic contract for an intervention. Returns (contract, tokens)."""
+    # The contract is still written BEFORE the code exists -- that is what stops
+    # the coder authoring a gate its own patch satisfies. But it must target what
+    # the CHOSEN IMPLEMENTATION claims to move, not merely what the problem is
+    # about. In run V8 the specifier wrote grouping postconditions while the
+    # planner had chosen a reweighting plan; the unreachable-target guard then
+    # dropped them, leaving an EMPTY contract, and three of six cycles trained
+    # with no semantic gate at all. A mis-targeted contract became no contract.
+    impl = idea.get("implementation") or {}
+    impl_block = ""
+    if impl:
+        impl_block = f"""
+THE IMPLEMENTATION THAT WAS CHOSEN (target YOUR postconditions at THIS)
+  {impl.get('name','')}: {impl.get('how','')}
+  it claims to move: {impl.get('moves_quantity','(unstated)')}
+  activation config:  {impl.get('config') or '{}'}
+A postcondition that this implementation cannot move is useless -- it will be
+dropped and you will have gated nothing.
+"""
+
     prompt = f"""You are about to implement an intervention. BEFORE writing any
 code, state what it must measurably CAUSE.
-
+{impl_block}
 THE PROBLEM (named independently from measurements)
   {problem.get('statement','')}
   dimension: {problem.get('dimension','')}
@@ -181,24 +281,16 @@ Return ONLY JSON:
     c = json.loads(txt)
 
     # Drop postconditions the patch cannot possibly satisfy.
-    kept, dropped = [], []
-    for pc in c.get("postconditions", []):
-        if pc.get("metric") in CONTROLLABLE and pc.get("op") in OPS:
-            kept.append(pc)
-        elif pc.get("metric") in FIXED_BY_DATA:
-            dropped.append(pc["metric"])
-    if dropped:
-        logger.info(f"    dropped unsatisfiable postconditions on {dropped} "
-                    f"(fixed by the data, not by the patch)")
-    c["postconditions"] = kept[:MAX_POSTCONDITIONS]
-    c["invariants"] = [i for i in c.get("invariants", [])
-                       if i.get("metric") in MEASURABLE and i.get("op") in OPS
-                       ][:MAX_INVARIANTS]
-    # The mandatory ones are not the agent's to negotiate.
-    have = {(i["metric"], i["op"]) for i in c["invariants"]}
-    for m in MANDATORY_INVARIANTS:
-        if (m["metric"], m["op"]) not in have:
-            c["invariants"].append(dict(m))
+    c = sanitise_contract(c, idea.get("config"))
+    if not c["postconditions"] and (idea.get("implementation") or {}).get("moves_quantity"):
+        # Last resort before running blind: gate on `changed` for any measurable
+        # quantity the chosen implementation itself named.
+        for m in CONTROLLABLE:
+            if m in str(impl.get("moves_quantity", "")):
+                c["postconditions"] = [{"metric": m, "op": "changed"}]
+                logger.info(f"    contract re-targeted at the implementation's "
+                            f"own claimed quantity: {m} changed")
+                break
 
     if not c["postconditions"]:
         logger.warning("    contract has no satisfiable postcondition; "
