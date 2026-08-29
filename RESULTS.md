@@ -60,23 +60,57 @@ path above.
 
 ## Reliability
 
+Every run below starts from the same reproduced 0.6014 reference with no
+task-specific answers in the agent's library and zero manual interventions.
+
 | architecture | runs | improved | best |
 |---|---|---|---|
-| V1–V3 (technique menu, measurement tools, problem naming) | 3 | **0** | — |
-| V4–V6 (semantic contracts, failure classification, exploit, anomaly board) | 5 clean-reference | **4** | 0.6031 |
+| V1–V3 — technique menu, measurement tools, problem naming | 3 | **0** | — |
+| V4 — semantic contracts, failure classification | 3 | 3 | 0.6031 |
+| V5 — + exploit cascade | 2 | 1 | 0.6022 |
+| **V6 — + observation coverage, anomaly board, implementation planner** | **5** | **3** | **0.6031** |
+| V7 — + codebase capability map, capability-aware scoring | 2 | 0 | — |
+| V8 — + stronger coder on the V7 stack | 1 | 0 | — |
 
-V1–V3 produced zero improvements in 70+ cycles. The architectural change is real;
-n is small, and "reliable" is not claimed.
+V4–V6 combined: **7 improvements in 10 runs.**
+
+V1–V3 produced zero improvements in 70+ cycles; that architectural change is
+real. n is small and "reliable" is not claimed.
+
+**V7 and V8 were tested and reverted.** Both fixed the failures they targeted —
+the direct grouping intervention went from ranked last (2.75) to ranked first
+(5.00), and the compound objective-plus-config mechanism was assembled correctly
+for the first time — and neither produced a win in three runs. The most likely
+explanation is that V7 redirected effort from easy interventions that
+occasionally landed toward the direct one, which is harder to implement. The
+shipped pipeline is V6; the V7/V8 work is preserved on branch
+`v7-v8-investigation` and its diagnostic value is described in Limitations.
+
+### The coder is the measured constraint, and the model choice matters
+
+Same architecture, same 25-cycle budget, only the coder changed:
+
+| | `gpt-4o` | `gpt-5.5` |
+|---|---|---|
+| crashes from generated code | **3** | **0** |
+| keeps | 0 | **1 (0.6030)** |
+| tokens | 313K | **146K** |
+| cycles to convergence | 25 (hit the cap) | 13 |
+
+Cheaper overall despite a higher per-call cost, because better code reaches a
+verdict sooner. On an isolated grouped-listwise task where `gpt-4o` crashed,
+`gpt-5.5` scored 0.6037 against 0.6036 for the human implementation. `gpt-5.5`
+is now the default coder.
 
 ## Resource report
 
 | | |
 |---|---|
-| research runs executed | 11 with recorded summaries |
-| LLM tokens, all runs | **2,051,117** |
-| GPU-hours, all runs | **2.33** (CPU-only; numpy, no accelerator) |
-| single run cost | 82K–303K tokens, 0.02–0.34 GPU-hours |
-| best single run | 0.6031 at 166K tokens / 0.16 GPU-hours |
+| research runs executed | 18 with recorded summaries |
+| LLM tokens, all runs | **4,123,811** |
+| GPU-hours, all runs | **4.09** (CPU-only; numpy, no accelerator) |
+| single run cost | 82K–466K tokens, 0.02–0.46 GPU-hours |
+| best single run | 0.6030 at 146K tokens, converged in 13 cycles |
 | manual interventions | **0** in every run |
 | hardware | one laptop CPU; the baseline trains in ~15s |
 
@@ -87,7 +121,8 @@ Model routing — each role gets what it needs, not the most expensive option:
 | role | model | why |
 |---|---|---|
 | analyst | `gpt-4o-mini` | *measured to be a bottleneck; see limitations* |
-| classifier / inventor / **coder** | `gpt-4o` | the coder is the measured constraint |
+| classifier / inventor | `gpt-4o` | naming a problem is not the constraint |
+| **coder** | **`gpt-5.5`** | **the measured constraint — 3 crashes to 0, and cheaper per run** |
 | reflector | `gpt-4o-mini` | its verdict is arithmetic; it writes only prose |
 
 ## What the guards caught
@@ -119,7 +154,12 @@ Before the leak guard existed, one such patch scored 0.6449 and was accepted.
    hyperparameters. The practical ceiling looks like ~0.604.
 4. **The agent diagnoses better than it implements.** In one 25-cycle run it
    named the decisive problem four times and converted it to a working patch
-   zero times. Contract satisfaction runs 45–64%.
+   zero times. Contract satisfaction runs 25–88% across runs.
+   The V7/V8 investigation narrowed this further: given a detailed
+   specification `gpt-5.5` implements the decisive mechanism correctly (0.6037),
+   but given the planner's two-sentence brief the same model produces no-ops.
+   The binding constraint is the quality of the specification handed to the
+   coder, not the coder alone.
 5. **OBSERVE gates discovery.** Before V6, the analyst chose `cold_start_rates`
    in 100% of cycles and the two tools that reveal the decisive fact in 14% and
    0%. The cheapest model in the pipeline was deciding what the expensive ones

@@ -1,0 +1,50 @@
+{
+  "stop_reason": "max_iterations",
+  "cycles": 25,
+  "wall_seconds": 2035.0,
+  "start_primary": 0.601384162902832,
+  "best_primary": 0.601384162902832,
+  "improvement_over_start": 0.0,
+  "beat_baseline": 0.0,
+  "baseline_primary": 0.6016,
+  "delta_vs_baseline": -0.00019999999494757503,
+  "submission_checkpoint": "agent-best",
+  "best_checkpoint": null,
+  "primary_history": [
+    0.6000873446464539,
+    0.599099338054657,
+    0.5988099575042725,
+    0.5859066247940063,
+    0.6011369824409485,
+    0.5944914817810059,
+    0.5953564643859863,
+    0.5979095697402954,
+    0.5955522060394287,
+    0.593135416507721,
+    0.6014998555183411,
+    0.6015965938568115,
+    0.6007212400436401,
+    0.5897457599639893,
+    0.6011369824409485,
+    0.5960885286331177,
+    0.5953564643859863
+  ],
+  "tokens_by_role": {
+    "analyst": 21868,
+    "classifier": 54794,
+    "inventor": 80223,
+    "coder": 159121,
+    "reflector": 6592
+  },
+  "model_routing": {
+    "analyst": "gpt-4o-mini",
+    "classifier": "gpt-4o",
+    "inventor": "gpt-4o",
+    "coder": "gpt-4o",
+    "reflector": "gpt-4o-mini"
+  },
+  "tokens_in": 313494,
+  "tokens_out": 0,
+  "gpu_hours": 0.302,
+  "manual_interventions": 0
+}

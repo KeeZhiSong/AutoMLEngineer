@@ -59,8 +59,9 @@ solution/
   train.py    AGENT-EDITABLE  ─┘
   eda.py      FROZEN. 9 dataset-inspection tools. Neutral numbers, no
               interpretation — a tool that flags a finding leaks the answer.
-agent/        analyst → classifier → inventor → specifier → coder
+agent/        analyst → classifier → inventor → planner → specifier → coder
               → reflector → exploiter (on a keep only)
+              anomalies.py: named problems persist across cycles
 lib/          techniques.jsonl + beliefs.py (claims WITH contradicting evidence)
 tests/        contract tests for the silent-failure cases
 workspace/    experiments.jsonl, INSIGHTS.md, DEAD_ENDS.md, summary.json
@@ -130,9 +131,13 @@ also held across four separate temporal windows (14/14 paired seeds).
 
 **The agent independently reaches 0.6031** from a 0.6014 reference, with no
 answers in its technique library, 5-seed confirmed in-loop, zero manual
-interventions — by a different route (a reweighted logloss). It does so on
-**3 of 5 architecture-V4/V5 runs**; the three generations before that produced
-zero improvements in 70+ cycles.
+interventions — by a different route (a reweighted logloss). Across V4–V6 it
+improves on **7 of 10 clean-reference runs**; the three generations before that
+produced zero improvements in 70+ cycles.
+
+The shipped pipeline is **V6**. V7 and V8 were built, tested over three runs and
+reverted — they fixed the failures they targeted without producing a win. That
+work is preserved on branch `v7-v8-investigation`; see `RESULTS.md`.
 
 The test split has been scored **zero** times — the CSV holds test predictions,
 but the test metric is deliberately withheld until the config is final.
@@ -142,11 +147,15 @@ but the test metric is deliberately withheld until the config is final.
 - **Two results, two authors, and the difference matters.** The 0.6038 came from
   a human diagnostic. The 0.6031 came from the agent unaided. Both belong in any
   honest description of this system, and neither should be reported as the other.
-- **It does not improve every run.** 3 of 5. The difference between a winning run
-  and a losing one appears to be how ambitious an intervention the LLM happens to
-  choose: runs that attempt transformers or adversarial training fail to
-  implement them correctly in numpy; the run that attempted a reweighted loss
-  succeeded. That is sampling variance in a real component, not measurement noise.
+- **It does not improve every run.** 7 of 10. Run-to-run variance exceeds the
+  difference between architecture generations, so no version is separable from
+  another by result alone. Two causes are measured. Ambition: runs attempting
+  transformers or adversarial training fail to implement them in numpy, while
+  the run attempting a reweighted loss succeeded. And observation bias: across
+  14 logged cycles the analyst chose `cold_start_rates` — a measured dead end —
+  in 100% of them, and the two tools revealing the decisive train/eval list-size
+  mismatch in 14% and 0%. Nothing downstream can name a problem it was never
+  shown. V6 schedules the opening cycles to guarantee coverage.
 - **The V5 EXPLOIT stage has never fired.** It triggers on a keep, and the one
   run under V5 produced none. It is unit-tested and unvalidated.
 - The margin is thin: +0.0022 is ~3.0 standard errors once the baseline's own
@@ -173,7 +182,7 @@ does not need a strong model; the Coder is the measured bottleneck and does.
 | analyst | pick 3 tools, report numbers | `gpt-4o-mini` |
 | classifier | name the problem | `gpt-4o` |
 | inventor | propose interventions | `gpt-4o` |
-| **coder** | **write correct numpy** | `gpt-4o` ← the bottleneck |
+| **coder** | **write correct numpy** | `gpt-5.5` ← the bottleneck |
 | reflector | explain a decision already made | `gpt-4o-mini` |
 
 ```bash
@@ -185,8 +194,14 @@ Model ids beginning `claude-` route to Anthropic automatically (needs
 `ANTHROPIC_API_KEY` and the `anthropic` SDK). Per-role token usage is reported
 in `summary.json` under `tokens_by_role`, alongside the routing actually used.
 
-Measured so far: `gpt-4o-mini` cannot write a correct grouped gradient at all.
-`gpt-4o` names the right problem far more often than it implements one — across
-V4/V5 runs it produced 3 accepted improvements from 32 trained experiments, with
-34 more blocked before training by contract or leak checks. Implementation, not
-diagnosis, is where a stronger coder model would pay.
+Measured, same architecture and budget with only the coder changed: `gpt-4o`
+produced 3 crashes, 0 keeps and used 313K tokens; **`gpt-5.5` produced 0
+crashes, a keep at 0.6030, and used 146K** — cheaper overall, because better
+code converges sooner. On an isolated grouped-listwise task where `gpt-4o`
+crashed, `gpt-5.5` scored 0.6037 against 0.6036 for the human implementation.
+`gpt-4o-mini` cannot write a correct grouped gradient at all.
+
+Implementation, not diagnosis, is the constraint — and more precisely the
+SPECIFICATION handed to the coder: given a detailed brief `gpt-5.5` implements
+the decisive mechanism correctly, given the planner's two sentences the same
+model produces no-ops.

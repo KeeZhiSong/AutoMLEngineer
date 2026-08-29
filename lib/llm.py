@@ -6,6 +6,13 @@ under-powers the one that is actually failing. Measured:
 
   gpt-4o-mini   could not write a correct grouped gradient at all -- array-shape
                 crashes on every attempt.
+  gpt-5.5       the coder default. Measured head to head on the same
+                architecture, same 25-cycle budget, only the coder changed:
+                gpt-4o produced 3 crashes, 0 keeps and used 313K tokens;
+                gpt-5.5 produced 0 crashes, a keep at 0.6030, and used 146K --
+                cheaper overall because better code converges sooner. On an
+                isolated grouped-listwise task where gpt-4o crashed, gpt-5.5
+                scored 0.6037 against 0.6036 for the human implementation.
   gpt-4o        names the right problem in 11 of 16 scored cycles, and 0 of 16
                 implementations cleared the accept margin.
 
@@ -47,7 +54,7 @@ DEFAULT_ROUTING = {
     "analyst": "gpt-4o-mini",
     "classifier": "gpt-4o",
     "inventor": "gpt-4o",
-    "coder": "gpt-4o",
+    "coder": "gpt-5.5",
     "reflector": "gpt-4o-mini",
 }
 
