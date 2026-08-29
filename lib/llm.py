@@ -118,9 +118,15 @@ def _openai(model: str, prompt: str, max_tokens: int, json_mode: bool):
     if json_mode:
         kw["response_format"] = {"type": "json_object"}
     # Reasoning models reject max_tokens/temperature and use their own budget.
-    if model.startswith(("o1", "o3", "o4")):
+    # gpt-5* and the codex family behave the same way as o1/o3/o4.
+    if model.startswith(("o1", "o3", "o4", "gpt-5")) or "codex" in model:
         kw.pop("max_tokens", None)
-        kw["max_completion_tokens"] = max_tokens
+        # max_completion_tokens covers REASONING tokens as well as output. At the
+        # caller's budget a reasoning model can spend the whole allowance
+        # thinking and emit an empty string -- which is what gpt-5.5 did on the
+        # coder's 4000-token budget. Give reasoning models generous headroom;
+        # they stop when done, so this costs nothing when they finish early.
+        kw["max_completion_tokens"] = max(max_tokens * 4, 16000)
     r = OpenAI().chat.completions.create(**kw)
     return (r.choices[0].message.content or ""), \
            (r.usage.prompt_tokens + r.usage.completion_tokens)
