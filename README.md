@@ -63,32 +63,56 @@ agent/        analyst → classifier → inventor → planner → specifier → 
               → reflector → exploiter (on a keep only)
               anomalies.py: named problems persist across cycles
 lib/          techniques.jsonl + beliefs.py (claims WITH contradicting evidence)
+              llm.py: per-role model routing
 tests/        contract tests for the silent-failure cases
-workspace/    experiments.jsonl, INSIGHTS.md, DEAD_ENDS.md, summary.json
+artifacts/    human-best/ and agent-best*/ — both reproducible by score
+workspace*/   experiments.jsonl, anomalies.jsonl, INSIGHTS.md, summary.json
 ```
+
+The shipped pipeline is **V6**. V7 and V8 were built, tested over three runs and
+reverted — they fixed the failures they targeted without producing a win. That
+work is preserved on branch `v7-v8-investigation`, and `RESULTS.md` explains
+what it established.
 
 ## How the loop works
 
-1. **Analyst** picks 3 of 9 measurement tools and runs them on the data.
+1. **Analyst** measures the data. Cycles 1–2 are *scheduled* to cover the
+   distribution, label, ranking-context and cardinality families; free choice
+   resumes at cycle 3. Scheduling exists because it was measured that the
+   analyst chose `cold_start_rates` — a dead end — in 100% of 14 logged cycles,
+   and the two tools revealing the decisive fact in 14% and 0%. Nothing
+   downstream can name a problem it was never shown.
 2. **Classifier** turns the numbers into a *named problem* — e.g. "train/eval
    distribution mismatch, dimension = list length, ratio 6x". A fact suggests
    nothing; a named problem is what an intervention attaches to.
-3. **Inventor** proposes interventions open-ended, with **no technique menu in
+3. **Anomaly board** keeps named problems alive across cycles, merging
+   re-sightings and recording what has been tried. Without it one run diagnosed
+   the same decisive problem in four separate cycles as four fresh discoveries,
+   and followed up on none. A no-op does **not** retire an anomaly: an idea that
+   was never really tested is still open.
+4. **Inventor** proposes interventions open-ended, with **no technique menu in
    front of it**, then may *request* literature for its problem class. Pull, not
    push — retrieval after invention informs a hypothesis the agent already owns.
-4. **Coder** rewrites exactly one module. Syntax-, import- and leak-checked
-   before it is allowed to cost a training run.
-5. **Specifier** writes a semantic contract *before the code exists* — a handful
+5. **Planner** enumerates four ways to implement the committed hypothesis and
+   scores them on directness, fidelity, isolation and cost. A plan that cannot
+   name a measurable quantity it moves is disqualified, not merely penalised —
+   it could not be given a contract, so it could not be verified.
+6. **Specifier** writes a semantic contract *before the code exists* — a handful
    of measurable claims about what the patch must change. `instrument.py` checks
    them in 0.4s without training, so a patch that changes nothing never costs a
    run.
-6. **Reflector** decides keep/revert **arithmetically** — only if primary beats
+7. **Coder** rewrites exactly one module. Syntax-, import- and leak-checked
+   before it is allowed to cost a training run.
+8. **Reflector** decides keep/revert **arithmetically** — only if primary beats
    the incumbent by more than one published std (0.0008). The LLM writes the
-   explanation, never the verdict.
-7. **Exploiter** (on a keep only) spends up to 4 trials retuning a parameter the
-   new objective made stale, or dosing the intervention's strength to tell a
-   plateau from a lucky point. Built and unit-tested; **not yet exercised on a
-   live win.**
+   explanation, never the verdict. Failures are classified
+   implementation / optimisation / **scientific**, and only the last may weaken
+   a belief — a broken patch is not evidence against the idea it botched.
+9. **Exploiter** (on a keep only) spends up to 4 trials retuning a parameter the
+   intervention made stale. Which parameter is derived from *what measurably
+   changed*: a new feature points at capacity and regularisation, a batching or
+   objective change points at the step size. Fired on four live wins, declined
+   all four as inside the accept margin — **zero false wins**.
 
 Guards, each added because something got past the previous set:
 
@@ -101,6 +125,10 @@ Guards, each added because something got past the previous set:
 | per-cycle timeout | one experiment that ate 98% of a run's compute |
 | divergence abort | training that falls below the random-scoring floor |
 | loop lockfile | a second writer corrupting an in-flight experiment |
+| semantic contract | patches that read as the intervention and change nothing — the single most common failure |
+| failure classification | a broken implementation recorded as evidence against the idea it botched |
+| contract sanitisation | contracts forbidding their own intervention, e.g. "add a feature" gated on `embedding_dim_total unchanged` |
+| exit-restore + preflight-by-score | a run launched from the wrong code, verified by SCORE rather than by filename |
 
 ## What we deliberately do not use
 
@@ -109,7 +137,10 @@ Guards, each added because something got past the previous set:
   `long_time_play_cnt / show_cnt` is close to a per-video `long_view` rate
   computed partly on test labels. A contract test asserts we never load it.
 - `user_features_pure.csv` — legal, but a term constant within a user cannot
-  reorder that user's list. Only useful as a user×item cross.
+  reorder that user's list. We tested the obvious remedy, an explicit user×item
+  cross, and **measured exactly 0.0000**: an FM already computes every pairwise
+  field interaction, so a hand-built cross of two existing fields is a coarser
+  copy of something the model has. Only a genuinely new field can help.
 - `log_random_*.csv` — legal as an *unbiased cross-check* only; never trained on.
 
 ## Status
@@ -128,6 +159,10 @@ had been tuned for a pointwise loss). Against a matched control the paired t is
 11.3 on 4 df, all five seeds positive, complete separation; the grouping effect
 also held across four separate temporal windows (14/14 paired seeds).
 `submission.csv` is generated from this config and passes the organisers' checker.
+Both configurations are reproducible by score, not by assertion:
+
+    cp artifacts/human-best/*.py solution/ && python3 tools_preflight.py --expect winning
+    cp artifacts/agent-best/*.py  solution/ && python3 tools_preflight.py --expect agent
 
 **The agent independently reaches 0.6031** from a 0.6014 reference, with no
 answers in its technique library, 5-seed confirmed in-loop, zero manual
@@ -161,10 +196,15 @@ but the test metric is deliberately withheld until the config is final.
 - The margin is thin: +0.0022 is ~3.0 standard errors once the baseline's own
   0.0008 seed variance is propagated, not the 6.8 it looks like if you treat the
   published number as exact.
-- **Four independent stacking routes are closed by measurement** — the confirmed
-  effects compose to roughly the max of the parts, not the sum, because they are
-  reading the same item-quality signal. Practical ceiling looks like ~0.604
-  against an oracle of 0.8484.
+- **Seven directions are closed by measurement**, not by opinion: feature
+  stacking, seed ensembling (−0.0001; five seeds agree on within-user ordering
+  95.5% of the time and the metric reads order only), temporal decay (real but
+  subsumed), cold start (0.01% unseen items), auxiliary click targets (−0.0020;
+  because `P(long_view=1 | click=0) = 0.003`, clicked-but-not-long-viewed rows
+  are the confusable class the metric exists to separate, not weak positives),
+  hand-built user×item crosses (0.0000), and the remaining inherited
+  hyperparameters (`l2`, `batch`, `k`, `patience` all null). Practical ceiling
+  looks like ~0.604 against an oracle of 0.8484.
 - The convergence rule is gated on having accepted one improvement first; a
   literal reading ends any non-improving search at exactly 3 iterations. This is
   our interpretation, documented in `solution/scoring.py`.
