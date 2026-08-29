@@ -111,8 +111,11 @@ what it established.
 9. **Exploiter** (on a keep only) spends up to 4 trials retuning a parameter the
    intervention made stale. Which parameter is derived from *what measurably
    changed*: a new feature points at capacity and regularisation, a batching or
-   objective change points at the step size. Fired on four live wins, declined
-   all four as inside the accept margin — **zero false wins**.
+   objective change points at the step size. Fired on five live wins — one from a
+   deliberately handicapped reference, to exercise the branch on demand — and
+   declined all five as inside the accept margin. **Zero false wins.** In one
+   case a trial looked like +0.0012 on seed 0 and averaged to +0.0004 over five
+   seeds, which is exactly the error the margin exists to catch.
 
 Guards, each added because something got past the previous set:
 
