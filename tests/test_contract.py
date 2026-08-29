@@ -563,6 +563,343 @@ def test_exploit_win_survives_the_next_cycle():
     print("  exploit-tuned parameters survive into later cycles OK")
 
 
+def test_at_chance_result_is_not_scientific_evidence():
+    """A run that learned nothing must not be allowed to weaken a belief.
+
+    Both cases below are real, from run 10. Contrastive learning satisfied its
+    contract, trained 5 epochs and scored 0.4926 against a 0.4834 random floor
+    -- it cleared the floor by a hair and was filed as SCIENTIFIC, which is the
+    only class permitted to weaken a hypothesis. What failed was the
+    implementation, not the idea. Embedding dropout scored 0.5945 in the same
+    run: that one IS evidence, and must stay scientific.
+    """
+    from agent.reflector import classify_failure
+
+    hist = [{"epoch": i} for i in range(7)]
+    assert classify_failure("ok", True, {"primary": 0.4926}, 0.6001, hist) \
+        == "optimisation", "a result at chance was treated as evidence"
+    assert classify_failure("ok", True, {"primary": 0.5945}, 0.6001, hist) \
+        == "scientific", "a genuine near-miss stopped counting as evidence"
+    print("  at-chance results excluded from scientific evidence OK")
+
+
+def test_timeout_cannot_be_swallowed():
+    """A guard's own exception must not be catchable by the code it guards.
+
+    Both timeouts derived from Exception, and every probe in instrument.py sits
+    inside `except Exception`. The alarm fired inside the first model build, the
+    handler filed it as a probe error, and because signal.alarm is one-shot the
+    NEXT build ran uncapped. One cycle spent 35 minutes past a 120s limit.
+    """
+    import time as _t
+    from solution.instrument import _MeasureTimeout, _rearm
+    from solution.runner import _CycleTimeout
+
+    for T in (_MeasureTimeout, _CycleTimeout):
+        assert not issubclass(T, Exception), \
+            f"{T.__name__} is catchable by `except Exception`"
+        swallowed = True
+        try:
+            try:
+                raise T()
+            except Exception:                  # what the probe handlers look like
+                pass
+            else:
+                swallowed = False
+        except T:
+            swallowed = False
+        assert not swallowed, f"{T.__name__} was swallowed by a probe handler"
+
+    # and a consumed one-shot alarm must not leave a later probe uncapped
+    try:
+        _rearm(_t.monotonic() - 1)
+    except _MeasureTimeout:
+        pass
+    else:
+        raise AssertionError("_rearm did not fire on an already-expired deadline")
+    print("  timeouts survive `except Exception`, alarm re-armed per probe OK")
+
+
+def test_contract_cannot_forbid_its_own_intervention():
+    """An invariant must not pin a quantity the postcondition requires to move.
+
+    Run 13, real: three of the highest-scoring plans of the run were blocked by
+    `embedding_dim_total unchanged` / `model_n_params unchanged` while the idea
+    was "add a list-length feature". Adding a field necessarily adds embeddings.
+    One was rejected for moving embedding_dim_total by ONE (40260 -> 40261).
+    Contract satisfaction fell to 25%, the lowest of any run, and the blocks were
+    OUR bug rather than the agent's.
+    """
+    from agent.specifier import sanitise_contract
+
+    c = sanitise_contract({
+        "postconditions": [{"metric": "n_feature_fields", "op": "changed"}],
+        "invariants": [{"metric": "embedding_dim_total", "op": "unchanged"},
+                       {"metric": "model_n_params", "op": "unchanged"}]})
+    inv = {i["metric"] for i in c["invariants"]}
+    assert "embedding_dim_total" not in inv, "contract forbids its own effect"
+    assert "model_n_params" not in inv, "contract forbids its own effect"
+    assert "train_rows" in inv, "mandatory invariants must survive"
+
+    # a loss change must not be pinned on the quantities a loss change moves
+    c2 = sanitise_contract({
+        "postconditions": [{"metric": "loss_fn_name", "op": "changed"}],
+        "invariants": [{"metric": "initial_loss", "op": "unchanged"}]})
+    assert "initial_loss" not in {i["metric"] for i in c2["invariants"]}
+
+
+def test_grouping_postcondition_dropped_when_unreachable():
+    """`train_group_size_*` cannot move under row batching -- do not gate on it.
+
+    Run 13, real: four cycles blocked on
+    `train_group_size_median changed 1.0 -> got 1.0`. Under the reference
+    batch_mode="row" the median is 1.0 by construction and eval_sized_groups()
+    is never called, so no train.py edit alone can move it. The contract was
+    unsatisfiable before the coder wrote a line.
+    """
+    from agent.specifier import sanitise_contract
+
+    row = sanitise_contract(
+        {"postconditions": [{"metric": "train_group_size_median", "op": "changed"}],
+         "invariants": []}, {"batch_mode": "row"})
+    assert not row["postconditions"], "gated on an unreachable target"
+
+    user = sanitise_contract(
+        {"postconditions": [{"metric": "train_group_size_median", "op": "changed"}],
+         "invariants": []}, {"batch_mode": "user", "group_size": 5})
+    assert user["postconditions"], "a reachable grouping target must survive"
+    print("  contracts cannot forbid or over-reach their own intervention OK")
+
+
+def test_inert_grouping_plan_is_disqualified():
+    """Grouping under a non-grouped objective is a measured no-op -- reject it.
+
+    The trap is that it LOOKS like a clean test: `train_group_size_median`
+    genuinely moves once batch_mode="user" is set, so the contract passes, the
+    run scores baseline, and the result is filed as SCIENTIFIC failure --
+    evidence against the correct hypothesis. Handoff 04 5b measured the no-op.
+
+    Found offline: with the capability map stating the objective is not grouped,
+    the planner still chose a grouping-only plan at 5.00 in 3/3 trials, because
+    `capability` rewards using what already exists and a new objective scores low
+    on it. Stating the fact was not enough; it has to be enforced.
+    """
+    from agent.planner import _inert_grouping, score_plan
+
+    caps_pointwise = ("`pointwise_logloss` does NOT take `user_id` ... it "
+                      "is NOT a grouped objective.")
+    grouping_only = {"name": "Match Group Size", "how": "set batch_mode and group_size",
+                     "control_point": "train.py::user_batches",
+                     "config": {"batch_mode": "user", "group_size": 4},
+                     "directness": 5, "capability": 5, "fidelity": 5,
+                     "isolation": 5, "cheapness": 5}
+    assert _inert_grouping(grouping_only, caps_pointwise), \
+        "a grouping-only plan under a pointwise objective must be disqualified"
+
+    complete = {**grouping_only, "name": "Listwise + eval-sized groups",
+                "how": "replace the objective with a listwise loss over each "
+                       "user's list and set the grouping config"}
+    assert not _inert_grouping(complete, caps_pointwise), \
+        "a plan that changes the objective AND the grouping is legitimate"
+
+    # once the objective is already grouped, grouping plans are fine again
+    assert not _inert_grouping(grouping_only, "the objective is `listwise` and takes user_id")
+
+    grouping_only["fidelity"] = 1          # what the disqualification sets
+    assert score_plan(grouping_only) == 0.0
+    print("  inert grouping-under-pointwise plans disqualified OK")
+
+
+def test_capability_map_links_gated_keys():
+    """A key that only works with another must say so.
+
+    Run 15, real: the planner set `group_size` in one plan and
+    `batch_mode="user"` in another. Neither did anything -- `group_size` is read
+    only inside the `batch_mode == "user"` branch. The map listed both keys and
+    never linked them, so the agent had both facts and no relationship.
+    """
+    from agent.capabilities import capability_map
+
+    m = capability_map()
+    assert "read ONLY when" in m, "gated keys are not surfaced"
+    assert "group_size" in m and 'batch_mode == "user"' in m
+    gated = [l for l in m.splitlines() if "read ONLY when" in l]
+    assert any("group_size" in l for l in gated), \
+        "the group_size/batch_mode dependency is not stated"
+
+
+def test_activation_config_is_validated():
+    """Config from a plan must be checked against what the code actually reads.
+
+    Run 15 emitted `{"loss_function": "focal_loss"}` -- no module reads it -- and
+    `{"group_size": "config_value"}`, an LLM placeholder where an int belongs,
+    which cost one cycle 16 minutes before failing. Both reached run_cfg because
+    the merge was unvalidated.
+    """
+    from agent.capabilities import validate_config
+
+    kept, dropped = validate_config({"loss_function": "focal_loss"})
+    assert kept == {} and dropped, "unknown config key was accepted"
+
+    kept, dropped = validate_config({"group_size": "config_value"})
+    assert kept == {} and dropped, "placeholder string accepted for an int key"
+
+    kept, dropped = validate_config({"group_size": 5, "batch_mode": "user"})
+    assert kept == {"group_size": 5, "batch_mode": "user"} and not dropped, \
+        "a legitimate compound activation config was rejected"
+    print("  capability map links gated keys, activation config validated OK")
+
+
+def test_cascade_is_mechanism_conditioned():
+    """After a win, WHAT became stale depends on what actually changed.
+
+    All three cases are real. Run 11 accepted a temporal-decay FEATURE, the
+    generic cascade swept `lr` anyway, and 3e-4 tied the incumbent exactly --
+    four training runs to establish that nothing was stale. Adding a
+    deterministic feature does not change gradient scale; changing the batching
+    or the objective does.
+    """
+    from agent.exploiter import stale_candidates
+
+    feature, _ = stale_candidates({"n_feature_fields": 1})
+    assert "lr" not in feature, \
+        "a feature addition must not trigger a learning-rate sweep (run 11)"
+    assert "k" in feature or "l2" in feature
+
+    batching, _ = stale_candidates({"train_group_size_median": 1,
+                                    "optimiser_steps_per_epoch": 1})
+    assert "lr" in batching, \
+        "changing batch construction DOES make the step size stale (+0.0010)"
+
+    objective, _ = stale_candidates({"initial_loss": 1, "loss_fn_name": 1})
+    assert "lr" in objective, "an objective change alters gradient magnitude"
+
+    # nothing measured -> rule nothing out, rather than guess
+    unknown, _ = stale_candidates(None)
+    assert len(unknown) >= 4
+    print("  exploit cascade conditioned on what actually changed OK")
+
+
+def test_observe_coverage_reaches_the_decisive_tools():
+    """OBSERVE must not be able to miss the two tools that reveal the answer.
+
+    Measured across 14 logged cycles: `cold_start_rates` was picked in 100% of
+    them -- a measured dead end -- while `list_length_distribution` was picked in
+    14% and `usable_group_fraction` in 0%. Those two are the only tools that
+    expose the train/eval list-size mismatch, and nothing downstream can name a
+    problem it was never shown.
+    """
+    from agent.analyst import COVERAGE_SCHEDULE, TOOL_CATEGORY
+    from solution import eda
+
+    scheduled = {c["tool"] for sched in COVERAGE_SCHEDULE for c in sched}
+    assert {"list_length_distribution", "usable_group_fraction"} <= scheduled, \
+        "the decisive tools are not guaranteed to run"
+    for t in scheduled:
+        assert t in eda.TOOLS, f"scheduled tool {t} does not exist"
+    for t in TOOL_CATEGORY:
+        assert t in eda.TOOLS, f"categorised tool {t} does not exist"
+    print("  OBSERVE coverage reaches the decisive tools OK")
+
+
+def test_anomaly_board_remembers_across_cycles():
+    """A repeated diagnosis must accumulate, not be rediscovered.
+
+    Replays run 11: the list-length mismatch was named in cycles 6, 11, 12 and
+    16 -- four fresh discoveries, no follow-through -- while a temporal drift was
+    filed under the SAME problem class and must stay separate.
+    """
+    import tempfile
+    from agent.anomalies import AnomalyBoard
+
+    b = AnomalyBoard(tempfile.mkdtemp())
+    lists_a = {"problem_class": "train/eval distribution mismatch",
+               "statement": "training mean list length 43.54 vs validation 5.58"}
+    lists_b = {"problem_class": "train/eval distribution mismatch",
+               "statement": "63.699% of validation users have at most 5; train 43.54"}
+    drift = {"problem_class": "train/eval distribution mismatch",
+             "statement": "unseen users 3.617% in test vs 1.593% in valid"}
+    for c, p in ((6, lists_a), (11, lists_b), (12, lists_a), (16, lists_a), (18, drift)):
+        b.observe([p], c)
+
+    assert len(b.items) == 2, f"expected 2 distinct anomalies, got {len(b.items)}"
+    top = b.unresolved()[0]
+    assert top["sightings"] == 4, "re-sightings did not merge"
+    assert b.confidence(top) > 0.8, "repeated sightings must raise confidence"
+
+    # a no-op must NOT retire an anomaly -- the idea was never actually tested
+    b.record_attempt(6, "curriculum-learning", faithful=False, outcome="no-op")
+    assert b.unresolved()[0]["status"] == "unresolved"
+    before = b.confidence(b.unresolved()[0])
+    b.record_attempt(12, "instance-weighting", faithful=True, outcome="0.6009")
+    assert b.confidence(b.unresolved()[0]) < before, \
+        "a faithful failure should lower confidence; a no-op should not"
+    print("  anomaly board accumulates and separates correctly OK")
+
+
+def test_planner_prefers_the_minimal_implementation():
+    """Scoring must rank the direct fix above the elaborate one.
+
+    Run 11 chose curriculum learning over a direct grouping change on the same
+    diagnosis, four times, and every choice changed nothing measurable.
+    """
+    from agent.planner import score_plan
+
+    minimal = {"directness": 5, "capability": 5, "fidelity": 5,
+               "isolation": 5, "cheapness": 5}
+    middling = {"directness": 3, "capability": 3, "fidelity": 4,
+                "isolation": 4, "cheapness": 4}
+    elaborate = {"directness": 2, "capability": 2, "fidelity": 2,
+                 "isolation": 2, "cheapness": 2}
+    assert score_plan(minimal) > score_plan(middling) > score_plan(elaborate)
+
+    # a plan that cannot name the quantity it moves must lose to one that can,
+    # even when it looks more direct -- no-ops are the dominant failure
+    vague = {"directness": 5, "capability": 5, "fidelity": 1,
+             "isolation": 5, "cheapness": 5}
+    concrete = {"directness": 3, "capability": 3, "fidelity": 5,
+                "isolation": 3, "cheapness": 3}
+    assert score_plan(vague) == 0.0, \
+        "a plan naming no measurable quantity cannot be contracted -- disqualify it"
+    assert score_plan(concrete) > 0
+
+    # THE run 12 CASE. Re-batching was ranked LAST (2.75) because the model
+    # judged it invasive and expensive, not knowing eval_sized_groups(),
+    # user_batches(group_size=) and the batch_mode switch already exist.
+    # Priced with that knowledge it must beat the indirect reweighting.
+    rebatch_blind = {"directness": 3, "capability": 2, "fidelity": 3,
+                     "isolation": 2, "cheapness": 2}
+    rebatch_informed = {"directness": 5, "capability": 5, "fidelity": 5,
+                        "isolation": 4, "cheapness": 4}
+    weighted_loss = {"directness": 2, "capability": 3, "fidelity": 4,
+                     "isolation": 5, "cheapness": 4}
+    assert score_plan(rebatch_blind) < score_plan(weighted_loss), \
+        "this is the run 12 failure -- blind pricing loses to the indirect fix"
+    assert score_plan(rebatch_informed) > score_plan(weighted_loss), \
+        "capability-aware pricing must reverse it"
+    print("  planner prices the direct fix correctly once capabilities are known OK")
+
+
+def test_capability_map_is_factual_and_leaks_nothing():
+    """The map must describe the code, never the answer.
+
+    It exists because run 12 priced a config-level change as invasive surgery.
+    It must surface that `eval_sized_groups` and the `batch_mode` switch exist,
+    while containing no tuned value -- the parameter NAME is a fact about the
+    code, the value 5 is the answer.
+    """
+    from agent.capabilities import capability_map
+
+    m = capability_map()
+    assert "eval_sized_groups" in m, "the map misses existing grouping machinery"
+    assert "batch_mode" in m, "the map misses the config switch"
+    assert 'batch_mode == "user"' in m, "config-selected branches must be surfaced"
+    for banned in ("group_size=5", "group_size = 5", "2e-4", "0.0002", "0.6038",
+                   "0.6031", "listwise softmax is best"):
+        assert banned not in m, f"capability map leaks an answer: {banned}"
+    print("  capability map is factual and leaks no answer OK")
+
+
 def test_exploiter_hardcodes_no_winning_values():
     """The exploiter must search, not recall.
 
@@ -606,6 +943,18 @@ if __name__ == "__main__":
     test_exploit_branch_reachable()
     test_exploit_branch_executes()
     test_exploit_win_survives_the_next_cycle()
+    test_timeout_cannot_be_swallowed()
+    test_at_chance_result_is_not_scientific_evidence()
+    test_contract_cannot_forbid_its_own_intervention()
+    test_grouping_postcondition_dropped_when_unreachable()
+    test_cascade_is_mechanism_conditioned()
+    test_observe_coverage_reaches_the_decisive_tools()
+    test_anomaly_board_remembers_across_cycles()
+    test_planner_prefers_the_minimal_implementation()
+    test_capability_map_is_factual_and_leaks_nothing()
+    test_inert_grouping_plan_is_disqualified()
+    test_capability_map_links_gated_keys()
+    test_activation_config_is_validated()
     test_exploiter_hardcodes_no_winning_values()
     test_leakcheck_catches_the_real_leak()
     test_leakcheck_allows_train_only_target_encoding()
