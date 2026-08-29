@@ -180,39 +180,9 @@ work is preserved on branch `v7-v8-investigation`; see `RESULTS.md`.
 The test split has been scored **zero** times — the CSV holds test predictions,
 but the test metric is deliberately withheld until the config is final.
 
-## Limitations
-
-- **Two results, two authors, and the difference matters.** The 0.6038 came from
-  a human diagnostic. The 0.6031 came from the agent unaided. Both belong in any
-  honest description of this system, and neither should be reported as the other.
-- **It does not improve every run.** 7 of 10. Run-to-run variance exceeds the
-  difference between architecture generations, so no version is separable from
-  another by result alone. Two causes are measured. Ambition: runs attempting
-  transformers or adversarial training fail to implement them in numpy, while
-  the run attempting a reweighted loss succeeded. And observation bias: across
-  14 logged cycles the analyst chose `cold_start_rates` — a measured dead end —
-  in 100% of them, and the two tools revealing the decisive train/eval list-size
-  mismatch in 14% and 0%. Nothing downstream can name a problem it was never
-  shown. V6 schedules the opening cycles to guarantee coverage.
-- **The V5 EXPLOIT stage has never fired.** It triggers on a keep, and the one
-  run under V5 produced none. It is unit-tested and unvalidated.
-- The margin is thin: +0.0022 is ~3.0 standard errors once the baseline's own
-  0.0008 seed variance is propagated, not the 6.8 it looks like if you treat the
-  published number as exact.
-- **Seven directions are closed by measurement**, not by opinion: feature
-  stacking, seed ensembling (−0.0001; five seeds agree on within-user ordering
-  95.5% of the time and the metric reads order only), temporal decay (real but
-  subsumed), cold start (0.01% unseen items), auxiliary click targets (−0.0020;
-  because `P(long_view=1 | click=0) = 0.003`, clicked-but-not-long-viewed rows
-  are the confusable class the metric exists to separate, not weak positives),
-  hand-built user×item crosses (0.0000), and the remaining inherited
-  hyperparameters (`l2`, `batch`, `k`, `patience` all null). Practical ceiling
-  looks like ~0.604 against an oracle of 0.8484.
-- The convergence rule is gated on having accepted one improvement first; a
-  literal reading ends any non-improving search at exactly 3 iterations. This is
-  our interpretation, documented in `solution/scoring.py`.
-- Bonus benchmarks (KuaiRand-1k / 27k) not attempted.
-- The coder needs `gpt-4o`; `gpt-4o-mini` cannot write a correct grouped gradient.
+Full results, the run-by-run reliability record, the seven directions closed by
+measurement, and an honest accounting of every false win — the agent's two and
+the harness's ten — are in [`RESULTS.md`](RESULTS.md).
 
 ## Model routing
 
