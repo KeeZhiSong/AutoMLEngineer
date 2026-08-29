@@ -30,16 +30,37 @@ from __future__ import annotations
 import importlib
 import inspect
 import signal
+import time
 
 import numpy as np
 
 
-class _MeasureTimeout(Exception):
-    pass
+class _MeasureTimeout(BaseException):
+    """Derives from BaseException DELIBERATELY.
+
+    As an Exception it was swallowed by the `except Exception` guarding each
+    probe below: the alarm fired inside the first model build, the handler
+    recorded it as a probe error, and because signal.alarm is one-shot the
+    NEXT build ran with no cap at all. One cycle spent 35 minutes past a 120s
+    limit that way. A guard's own exception must not be catchable by the code
+    it guards.
+    """
 
 
 def _alarm(signum, frame):                          # noqa: ARG001
     raise _MeasureTimeout()
+
+
+def _rearm(deadline: float) -> None:
+    """Re-arm the one-shot alarm for whatever time is left.
+
+    Belt and braces alongside the BaseException change: even if some future
+    handler swallows the timeout, the next probe still starts with a live cap.
+    """
+    left = deadline - time.monotonic()
+    if left <= 0:
+        raise _MeasureTimeout()
+    signal.alarm(max(1, int(left)))
 
 
 _ENCODED: dict = {}
@@ -87,6 +108,7 @@ def measure(ds, config: dict | None = None, timeout_seconds: int = 120) -> dict:
     _prev = None
     try:
         _prev = signal.signal(signal.SIGALRM, _alarm)
+        deadline = time.monotonic() + timeout_seconds
         signal.alarm(int(timeout_seconds))
 
         features = _reload("solution.features")
@@ -144,6 +166,7 @@ def measure(ds, config: dict | None = None, timeout_seconds: int = 120) -> dict:
             out["unique_users_per_batch"] = int(len(lengths))
 
         # ---- model, by construction only (no training) --------------------
+        _rearm(deadline)
         try:
             model_mod = _reload("solution.model")
             _m = model_mod.build(state, {**cfg, "seed": cfg.get("seed", 0)})
@@ -161,6 +184,7 @@ def measure(ds, config: dict | None = None, timeout_seconds: int = 120) -> dict:
 
         # ---- objective, by introspection then ONE forward pass ------------
         out["loss_fn_name"] = _loss_fn_of(train_mod)
+        _rearm(deadline)
         try:
             model_mod = _reload("solution.model")
             lf = inspect.signature(train_mod.fit).parameters["loss_fn"].default

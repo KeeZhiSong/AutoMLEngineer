@@ -180,6 +180,17 @@ def classify_failure(status: str, contract_satisfied: bool | None,
         return "implementation"
     if primary < RANDOM_FLOOR_PRIMARY:
         return "optimisation"                       # diverged, not disproved
+    # A score AT chance is not evidence either, and the floor alone has a cliff:
+    # 0.4926 against a 0.4834 floor cleared it by a hair and was filed as
+    # SCIENTIFIC, writing "contrastive learning fails here" into beliefs when
+    # what actually failed was the implementation. Require the run to have
+    # learned an appreciable fraction of the incumbent's edge over chance before
+    # its result is allowed to weaken a hypothesis. The 0.25 is a judgement
+    # call, not a measured constant.
+    if incumbent > RANDOM_FLOOR_PRIMARY and (
+            primary - RANDOM_FLOOR_PRIMARY
+            < 0.25 * (incumbent - RANDOM_FLOOR_PRIMARY)):
+        return "optimisation"                       # at chance: broken, not disproved
     if history is not None and len(history) <= 2:
         return "optimisation"                       # stopped before it trained
     return "scientific"

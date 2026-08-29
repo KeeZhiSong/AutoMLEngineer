@@ -63,8 +63,12 @@ def _attach_aux(enc, split):
     return enc
 
 
-class _CycleTimeout(Exception):
-    pass
+class _CycleTimeout(BaseException):
+    """BaseException so agent-written code cannot swallow it.
+
+    train.py and model.py are rewritten every cycle and a broad
+    `except Exception` in either would otherwise absorb the cycle cap.
+    """
 
 
 def _alarm(signum, frame):                      # noqa: ARG001
