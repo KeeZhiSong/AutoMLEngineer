@@ -83,12 +83,31 @@ Keep to 200 words."""
 def invent(problems: list[dict],
            beliefs=None,
            led=None,
-           model: str = "gpt-4o") -> tuple[dict, int]:
-    """Named problem -> one committed, atomic intervention. Returns (idea, tokens)."""
+           model: str = "gpt-4o",
+           board=None,
+           problem_ids: list[str] | None = None) -> tuple[dict, int]:
+    """Named problem -> one committed, atomic intervention. Returns (idea, tokens).
+
+    `board` is the AnomalyBoard. Without it the agent re-derived its problem
+    every cycle from whatever OBSERVE sampled, so in run 11 it diagnosed the
+    list-length mismatch four separate times and followed up on none of them.
+    A high-confidence anomaly that has never had a FAITHFUL attempt outranks
+    whatever this cycle happened to measure.
+    """
     if not problems:
         raise ValueError("no named problem to work from")
 
     problem = problems[0]
+    anomaly_id = (problem_ids or [""])[0]
+    if board is not None:
+        for a in board.unresolved(min_sightings=2):
+            if not any(x["faithful"] for x in a["attempts"]):
+                problem = {**problem,
+                           "statement": a["statement"],
+                           "problem_class": a.get("problem_class", ""),
+                           "_from_board": True}
+                anomaly_id = a["id"]
+                break
     tokens = 0
 
     belief_block = beliefs.context() if beliefs is not None else "(none)"
@@ -117,12 +136,27 @@ WHAT THIS RUN BELIEVES SO FAR
 ALREADY ATTEMPTED
 {tried or "(nothing yet)"}
 
+UNRESOLVED ANOMALY BOARD (confidence, sightings, what has been tried)
+{board.render() if board is not None else "(not tracked)"}
+A high-confidence anomaly with NO faithful attempt is the most valuable thing
+you can work on: it has been seen repeatedly and never actually tested. An
+anomaly whose attempts are all no-ops has not been tested either -- the idea
+was never really run, so it is still open.
+
 You may edit exactly one of: features.py (what the model sees), model.py (the
 scoring function), train.py (objective, optimiser, batching).
 
 Propose 3 DIFFERENT interventions that would address this problem. Think from
 the mechanism, not from a catalogue of method names. Two of them should be
 things you could implement today in numpy; one may be more ambitious.
+
+One of the three MUST be the most direct change that would test the mechanism --
+the smallest edit that makes the problem go away, even if it looks unambitious.
+MEASURED, run 11: on four separate occasions the correct diagnosis was made, a
+direct train.py change was among the candidates, and a more elaborate option was
+chosen instead (curriculum learning, adaptive embedding sizes, a novelty
+feature). All four changed nothing measurable. The elaborate option is not the
+serious one; the one that isolates the mechanism is.
 
 For each, state the mechanism by which it would change the metric. Remember the
 metric is computed WITHIN a user, so anything constant across a user's
@@ -172,7 +206,12 @@ Return ONLY JSON:
 {"LITERATURE YOU ASKED FOR:" + chr(10) + lit if lit else "You chose not to consult the literature."}
 
 Pick ONE and make it precise enough to implement. Rules:
-  · Change ONE thing. A bundled change cannot be attributed.
+  · Change ONE MECHANISM. Not one line -- one mechanism. A code change plus the
+    config that switches it on is ONE intervention and stays attributable,
+    because the contract verifies the realised effect either way. Some code
+    paths are INERT until a config key selects them, so splitting the pair
+    produces two cycles that each measure nothing and each look like a failure
+    of the idea. What you must not do is bundle two UNRELATED mechanisms.
   · It must plausibly move a WITHIN-USER ordering.
   · Give a kill criterion: the result that would tell us this is wrong, so we
     do not burn revisions on it.
@@ -201,4 +240,5 @@ Return ONLY JSON:
     idea["problem"] = problem
     idea["candidates_considered"] = candidates
     idea["literature"] = lit[:2000]
+    idea["_anomaly_id"] = anomaly_id
     return idea, tokens
