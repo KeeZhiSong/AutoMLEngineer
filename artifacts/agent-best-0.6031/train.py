@@ -133,74 +133,24 @@ def user_batches(user_id: np.ndarray, batch_size: int, rng,
     Use this whenever the objective is a within-user ranking loss. For a
     pointwise loss it makes no difference and row batching is fine.
     """
-    # curriculum-learning: when group_size is supplied it is a true maximum
-    # sequence length, so use exact chunks rather than +/- jittered lists.
-    groups = (eval_sized_groups(user_id, rng, int(group_size), jitter=0)
-              if group_size else group_by_user(user_id))
+    # group_size chops users into eval-sized lists first -- see
+    # eval_sized_groups() for the measured reason this matters.
+    groups = (eval_sized_groups(user_id, rng, group_size) if group_size
+              else group_by_user(user_id))
     rng.shuffle(groups)
 
     batches, current, count = [], [], 0
-    current_users: set[int] = set()
     for g in groups:
-        # curriculum-learning: do not place two chunks from the same user in one
-        # batch, otherwise a grouped loss would merge them back into a longer
-        # sequence and defeat the length cap.
-        uid = int(user_id[g[0]])
-        if count and (count + len(g) > batch_size or uid in current_users):
+        # A single user larger than the batch still ships whole -- splitting it
+        # would reintroduce exactly the fragmentation this function prevents.
+        if count and count + len(g) > batch_size:
             batches.append(np.concatenate(current))
             current, count = [], 0
-            current_users = set()
         current.append(g)
-        current_users.add(uid)
         count += len(g)
     if current:
         batches.append(np.concatenate(current))
     return batches
-
-
-def _as_bool(x) -> bool:
-    """Parse config booleans without making callers use a specific type."""
-    if isinstance(x, str):
-        return x.lower() not in ("0", "false", "no", "off")
-    return bool(x)
-
-
-def _max_user_length(user_id: np.ndarray) -> int:
-    """curriculum-learning: full sequence length is the longest train user list."""
-    if len(user_id) == 0:
-        return 0
-    _, _, lengths = group_segments(user_id)
-    return int(lengths.max()) if len(lengths) else 0
-
-
-def _curriculum_group_size(epoch: int, max_epochs: int, patience: int,
-                           full_len: int, cfg: dict) -> int | None:
-    """curriculum-learning: ramp the max per-user sequence length to full lists.
-
-    Returns an integer cap for early epochs and None once full-length sequences
-    should be used.
-    """
-    start_raw = cfg.get("curriculum_start",
-                        cfg.get("curriculum_start_size",
-                                cfg.get("group_size", 5)))
-    start = 5 if start_raw is None else int(start_raw)
-    start = max(1, start)
-
-    if full_len <= start:
-        return None
-
-    # curriculum-learning: default ramp reaches full length before patience can
-    # stop training, so the model eventually trains on complete sequences.
-    ramp_default = min(max_epochs, max(2, patience + 1))
-    ramp_epochs = int(cfg.get("curriculum_epochs", ramp_default))
-    ramp_epochs = max(1, min(max_epochs, ramp_epochs))
-
-    if ramp_epochs <= 1 or epoch >= ramp_epochs:
-        return None
-
-    frac = (epoch - 1) / max(1, ramp_epochs - 1)
-    size = int(round(start + frac * (full_len - start)))
-    return None if size >= full_len else max(1, size)
 
 
 class Adam:
@@ -225,16 +175,15 @@ class Adam:
             p -= self.lr * mhat / (np.sqrt(vhat) + self.eps)
 
 
-def pointwise_logloss(model: FM, X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, float]:
-    """Baseline objective. Returns (dLoss/dlogit per row, mean loss).
-
-    Replacing this function is the highest-value change in the project -- the
-    metrics are ranking metrics and this one is not.
-    """
+def weighted_logloss(model: FM, X: np.ndarray, y: np.ndarray) -> tuple[np.ndarray, float]:
+    """Implement weighted loss to emphasize positive interactions."""
     z, _, _ = model.logits(X)
     p = sigmoid(z)
-    dz = ((p - y) / len(y)).astype(np.float32)
-    loss = float(-np.mean(y * np.log(p + 1e-9) + (1 - y) * np.log(1 - p + 1e-9)))
+    # Increase the weight for positive labels to emphasize them
+    pos_weight = 2.0  # This is a hyperparameter and can be tuned
+    weights = np.where(y > 0, pos_weight, 1.0)  # Apply higher weight to positives
+    dz = ((weights * (p - y)) / len(y)).astype(np.float32)
+    loss = float(-np.mean(weights * (y * np.log(p + 1e-9) + (1 - y) * np.log(1 - p + 1e-9))))
     return dz, loss
 
 
@@ -250,7 +199,7 @@ def fit(model: FM,
         train_enc: Encoded,
         valid_enc: Encoded,
         config: dict | None = None,
-        loss_fn=pointwise_logloss,
+        loss_fn=weighted_logloss,  # Use the weighted logloss function
         log=print) -> tuple[FM, list[dict]]:
     """Train with early stopping on validation primary. Never sees test."""
     cfg = config or {}
@@ -261,38 +210,22 @@ def fit(model: FM,
     patience = int(cfg.get("patience", 4))
     seed = int(cfg.get("seed", 0))
 
-    # curriculum-learning: enable a length ramp by default; callers can set
-    # curriculum=False to recover fixed group_size / row batching behaviour.
-    curriculum = _as_bool(cfg.get("curriculum", True))
-
     # "user" keeps each user's impressions in one batch -- required for any
     # within-user ranking loss. "row" is classic random-permutation batching,
     # correct for a pointwise loss.
-    # curriculum-learning: if the caller did not choose a batching mode, use
-    # user batches so the sequence-length schedule is actually applied.
-    batch_mode = str(cfg.get("batch_mode", "user" if curriculum else "row"))
+    batch_mode = str(cfg.get("batch_mode", "row"))
 
     rng = np.random.default_rng(seed)
     opt = Adam(list(model.params()), lr=lr)
-
-    # curriculum-learning: the schedule ramps up to the train-only full length.
-    full_user_len = _max_user_length(train_enc.user_id) if curriculum else 0
 
     best, best_snap, bad = -1.0, model.snapshot(), 0
     history: list[dict] = []
 
     for epoch in range(1, max_epochs + 1):
         t0 = time.time()
-        epoch_group_size = None
         if batch_mode == "user":
-            # curriculum-learning: gradually increase the maximum sequence
-            # length shown during training, ending with full-length lists.
-            epoch_group_size = (_curriculum_group_size(epoch, max_epochs,
-                                                       patience, full_user_len,
-                                                       cfg)
-                                if curriculum else cfg.get("group_size"))
             batches = user_batches(train_enc.user_id, bs, rng,
-                                   group_size=epoch_group_size)
+                                   group_size=cfg.get("group_size"))
         else:
             order = rng.permutation(len(train_enc))
             batches = [order[i:i + bs] for i in range(0, len(order), bs)]
@@ -318,20 +251,10 @@ def fit(model: FM,
         metrics = score(valid_enc.user_id, valid_enc.y, model.predict(valid_enc.X))
         row = {"epoch": epoch, "loss": float(np.mean(losses)),
                "seconds": round(time.time() - t0, 2), **metrics}
-        if curriculum and batch_mode == "user":
-            # curriculum-learning: expose the active cap in history for audits.
-            row["curriculum_max_len"] = (None if epoch_group_size is None
-                                         else int(epoch_group_size))
         history.append(row)
-
-        curriculum_msg = ""
-        if curriculum and batch_mode == "user":
-            curriculum_msg = (" | max_len full" if epoch_group_size is None
-                              else f" | max_len {int(epoch_group_size)}")
         log(f"  epoch {epoch:2d} | loss {row['loss']:.4f} | valid "
             f"GAUC {metrics['GAUC']:.4f} nDCG@5 {metrics['nDCG@5']:.4f} "
-            f"primary {metrics['primary']:.4f}{curriculum_msg} | "
-            f"{row['seconds']}s")
+            f"primary {metrics['primary']:.4f} | {row['seconds']}s")
 
         # Divergence guard. A run scoring below the random baseline (0.4834 on
         # valid) is not a slow starter, it is broken -- an unstable learning

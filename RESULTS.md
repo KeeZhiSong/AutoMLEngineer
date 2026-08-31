@@ -16,8 +16,8 @@ contaminated by it.
 | item popularity | 0.5807 | −0.0209 | floor |
 | **official FM baseline** | **0.6016** | — | the bar |
 | our reproduction of it | 0.6014 | −0.0002 | reproduces to within seed noise |
-| **agent, fully unaided** | **0.6031** | **+0.0015** | loop, zero interventions |
-| **human-tuned — SUBMITTED** | **0.6038** | **+0.0022** | two-step diagnosis |
+| **agent, fully unaided — SUBMITTED** | **0.6038** | **+0.0022** | loop, zero interventions |
+| human-tuned (same score, different route) | 0.6038 | +0.0022 | two-step diagnosis |
 | oracle ceiling | 0.8484 | +0.2468 | perfect ranking |
 
 The ceiling is 0.8484, not 1.0: 27.1% of evaluation users have no positive label,
@@ -108,25 +108,38 @@ Deliverables 3 and 4 describe one run. This is it.
 
 | | |
 |---|---|
-| run log | `archive/runs/06-clean-run-14cyc/experiments.jsonl` |
-| configuration | `artifacts/agent-best/` (`weighted-loss-imbalance`, `train.py`) |
-| **iterations used** | **14 of the 50 cap**, stopped by convergence |
-| **total tokens (in + out)** | **142,612** |
-| **agent wall-clock** | **23 minutes** |
-| **GPU-hours** | **0.18** (CPU only; no accelerator was used) |
+| run log | `workspace_final/experiments.jsonl` |
+| configuration | `artifacts/agent-best/` |
+| **iterations used** | **13 of the 50 cap**, stopped by convergence |
+| **total tokens (in + out)** | **105,304** |
+| **agent wall-clock** | **59 minutes** |
+| **GPU-hours** | **0.81** (CPU only; no accelerator was used) |
 | **manual interventions** | **0** |
+
+Two accepted interventions, in order:
+
+| cycle | technique | module | primary |
+|---|---|---|---|
+| 1 | curriculum-learning | `train.py` | 0.6023 |
+| 3 | length-normalization | `features.py` | 0.6040 |
 
 ### Validation-best score, required benchmark
 
 | metric | ours | official baseline | absolute delta |
 |---|---|---|---|
-| GAUC | 0.6694 | 0.6674 | **+0.0020** |
-| nDCG@5 | 0.5367 | 0.5357 | **+0.0010** |
-| primary (mean of the two) | 0.6031 | 0.6016 | **+0.0015** |
-| **score_dataset** (equal-weighted mean of the metric deltas) | | | **+0.0015** |
+| GAUC | 0.6705 | 0.6674 | **+0.0031** |
+| nDCG@5 | 0.5375 | 0.5357 | **+0.0018** |
+| primary (mean of the two) | 0.6040 | 0.6016 | **+0.0024** |
+| **score_dataset** (equal-weighted mean of the metric deltas) | | | **+0.0024** |
 
-Five-seed confirmed by the loop itself before acceptance:
-`0.6024 0.6033 0.6037 0.6030 0.6029`.
+Those are seed 0. **Measured over 20 seeds the primary is 0.6038** (sd 0.0003,
+min 0.6033, max 0.6043), so the honest headline figure is **+0.0022**, and every
+one of the 20 seeds beat both the baseline and the previous best agent result.
+
+The value at acceptance was a single seed. It cleared the tie-break band by
+0.0001 and so skipped confirmation, and a neighbouring configuration in the same
+exploit sweep read 0.6040 on seed 0 and measured 0.6034 across five. It was
+therefore measured at n=20 before being used for anything.
 
 Bonus benchmarks (KuaiRand-1k, KuaiRand-27k) were not attempted.
 
@@ -205,9 +218,11 @@ Before the leak guard existed, one such patch scored 0.6449 and was accepted.
 
 ## Limitations
 
-1. **Two results by two authors.** 0.6038 is human-tuned; 0.6031 is the agent
-   unaided. Both belong in any honest description; neither should be reported as
-   the other.
+1. **The agent now matches the human result, by a different route.** Both reach
+   0.6038. The human path was a listwise objective on evaluation-length training
+   lists plus a retuned learning rate; the agent reached the same score through
+   curriculum learning over sequence length and a length-normalisation feature.
+   It did not rediscover the human path, and that distinction should be kept.
 2. **The margin is thin.** +0.0022 is ~3.0 standard errors once the baseline's
    own 0.0008 seed variance is propagated, not the 6.8 it appears.
 3. **Seven directions are closed by measurement** — feature stacking, seed

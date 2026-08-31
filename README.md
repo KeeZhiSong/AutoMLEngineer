@@ -250,10 +250,11 @@ The baseline is reproduced to within the published seed variance:
 | ours, valid | 0.6670 | 0.5358 | **0.6014** | 0.6016 |
 | ours, test | 0.6621 | 0.5286 | **0.5953** | 0.5946 |
 
-**Submitted result: valid primary 0.6038 over 5 seeds, +0.0022 over the
-baseline.** Listwise softmax with evaluation-length training groups (+0.0012),
-plus a learning rate retuned for that new objective (+0.0010; the inherited 1e-3
-had been tuned for a pointwise loss). Against a matched control the paired t is
+**A human-tuned configuration reaches the same 0.6038** by a different route:
+listwise softmax with evaluation-length training groups (+0.0012), plus a
+learning rate retuned for that new objective (+0.0010; the inherited 1e-3 had
+been tuned for a pointwise loss). It is kept in `artifacts/human-best/` as the
+benchmark the agent is measured against, and is **not** what is submitted. Against a matched control the paired t is
 11.3 on 4 df, all five seeds positive, complete separation; the grouping effect
 also held across four separate temporal windows (14/14 paired seeds).
 `submission.csv` is generated from this config and passes the organisers' checker.

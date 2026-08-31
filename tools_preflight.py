@@ -37,7 +37,9 @@ EXPECTED = {
                            # the gradient normalisation differs, which shifts
                            # what a given lr means. Restore with
                            #   cp artifacts/human-best/*.py solution/
-    "agent":     0.6024,   # weighted_logloss, found unaided (5-seed mean 0.6031)
+    "agent":     0.6040,   # curriculum-learning + length-normalization, seed 0
+                           # 20-seed mean 0.6038 (sd 0.0003). Found unaided by the
+                           # run in workspace_final; see artifacts/agent-best/.
 }
 TOL = 0.0005               # tighter than one seed std; same seed must reproduce
 

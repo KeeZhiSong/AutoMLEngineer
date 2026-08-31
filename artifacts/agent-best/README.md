@@ -1,21 +1,30 @@
 # Agent's best configuration — found unaided
 
-Produced by the clean run in `workspace/` (cycle 11), from a 0.6014 reference
-with no task-specific answers in its technique library.
+Produced by the run in `workspace_final/`, from a 0.6014 reference with no
+task-specific answers in its technique library and zero manual interventions.
 
-    technique : weighted-loss-imbalance
-    module    : train.py  (loss_fn = weighted_logloss)
-    valid     : 0.6031 over 5 seeds (0.6024 0.6033 0.6037 0.6030 0.6029)
-    vs baseline 0.6016 : +0.0015
-    seed 0    : 0.6024
+    valid     : 0.6038 over 20 seeds (sd 0.0003, min 0.6033, max 0.6043)
+    vs baseline 0.6016 : +0.0022
+    seed 0    : 0.6040
+    run       : converged in 13 cycles, 105,304 tokens, 59 minutes, 0.81 GPU-hours
 
-Confirmed at 5 seeds BY THE LOOP ITSELF before it was accepted -- the tie-break
-fires automatically when a result lands within 2 sigma of the incumbent, so this
-is not a single-seed artefact.
+Two accepted interventions, in order:
 
-Zero manual interventions. The contract for this cycle targeted `initial_loss`,
-which is the exact metric that falsely blocked a loss change two runs earlier --
-the `changed`-over-direction fix is what let it through.
+    cycle 1   curriculum-learning    train.py     0.6023
+    cycle 3   length-normalization   features.py  0.6040
+
+**This matches the human-tuned result (0.6038) exactly**, by a different route.
+The human path was a listwise objective on evaluation-length training lists plus
+a retuned learning rate. The agent reached the same score through curriculum
+learning over sequence length and a length-normalisation feature.
+
+The single-seed value at acceptance was 0.6040, which cleared the tie-break band
+by 0.0001 and so was accepted without confirmation. It was then measured over 20
+seeds before being used for anything: mean 0.6038, every seed above the previous
+agent best of 0.6031.
+
+The previous best (0.6031, weighted-loss-imbalance) is kept in
+`artifacts/agent-best-0.6031/`.
 
 Reproduce:
     cp artifacts/agent-best/*.py solution/
