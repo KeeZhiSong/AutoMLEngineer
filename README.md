@@ -213,6 +213,21 @@ after succeeding. Convergence is not evaluated on a winning cycle.
 
 Before the leak guard existed, one such patch scored **0.6449** and was accepted.
 
+## The search ledger (published page)
+
+`docs/index.html` visualises every experiment across every run: a grid of one
+cell per experiment, the score timeline, and the full run table. It is
+**generated, never hand-written**:
+
+```bash
+python3 tools_build_ledger.py           # rebuild docs/index.html
+python3 tools_build_ledger.py --check   # exit 1 if the page is stale
+```
+
+A GitHub Actions workflow regenerates it whenever a run log changes, so the
+published page cannot drift from the data it describes. Enable GitHub Pages on
+`main` + `/docs` to serve it.
+
 ## What we deliberately do not use
 
 - `video_features_statistic_pure.csv`, **leakage hazard.** Undated aggregate
