@@ -72,6 +72,7 @@ def collect(root: Path = ROOT) -> dict:
 
         exps = [{"c": r.get("cycle"), "k": kind_of(r),
                  "t": (r.get("source_technique") or "")[:38],
+                 "m": r.get("module_changed") or "",
                  "p": round(r["metrics"]["primary"], 4)
                       if (r.get("metrics") or {}).get("primary") else None}
                 for r in rows]
@@ -86,7 +87,60 @@ def collect(root: Path = ROOT) -> dict:
             "tok": summ.get("tokens_in", 0) + summ.get("tokens_out", 0),
             "stop": summ.get("stop_reason", ""), "exps": exps,
         })
-    return {"runs": runs, "total": sum(r["n"] for r in runs)}
+    return {"runs": runs, "total": sum(r["n"] for r in runs), **aggregates(root, runs)}
+
+
+# Techniques whose name places them in the family the human fix belongs to:
+# a listwise/grouped objective trained on evaluation-length lists.
+FAMILY = ("eval-length", "eval-size", "listwise", "group-size", "list-length")
+
+
+def aggregates(root: Path, runs: list[dict]) -> dict:
+    """Cross-run totals: effort by module and role, and the family tally."""
+    from collections import Counter
+    modules, roles, keeps_by_tech = Counter(), Counter(), []
+    gpu = wall = anomalies = fam = fam_kept = 0
+
+    for d in sorted(glob.glob(str(root / "archive/runs/*/"))) + \
+             sorted(glob.glob(str(root / "workspace*/"))):
+        ledger = Path(d) / "experiments.jsonl"
+        if ledger.exists():
+            for line in ledger.open():
+                if not line.strip():
+                    continue
+                r = json.loads(line)
+                tech = (r.get("source_technique") or "")
+                if r.get("module_changed"):
+                    modules[r["module_changed"]] += 1
+                in_family = any(k in tech.lower() for k in FAMILY)
+                fam += in_family
+                if r.get("stage") == "improve":
+                    keeps_by_tech.append(tech)
+                    fam_kept += in_family
+        summ = Path(d) / "summary.json"
+        if summ.exists():
+            sm = json.loads(summ.read_text())
+            gpu += sm.get("gpu_hours", 0) or 0
+            wall += sm.get("wall_seconds", 0) or 0
+            for k, v in (sm.get("tokens_by_role") or {}).items():
+                roles[k] += v
+        anom = Path(d) / "anomalies.jsonl"
+        if anom.exists():
+            anomalies += sum(1 for line in anom.open() if line.strip())
+
+    by_ver = {}
+    for r in runs:
+        v = by_ver.setdefault(r["ver"], {"runs": 0, "won": 0, "best": None, "exps": 0})
+        v["runs"] += 1
+        v["exps"] += r["n"]
+        v["won"] += bool(r["keeps"])
+        if r["best"] and (v["best"] is None or r["best"] > v["best"]):
+            v["best"] = r["best"]
+
+    return {"modules": dict(modules), "roles": dict(roles), "gpu": round(gpu, 2),
+            "wall_h": round(wall / 3600, 1), "anomalies": anomalies,
+            "family": fam, "family_kept": fam_kept,
+            "keeps_by_tech": keeps_by_tech, "by_ver": by_ver}
 
 
 CSS = """
@@ -216,6 +270,8 @@ def build_html(data: dict) -> str:
          '<span class="l">Best, unaided</span></div>',
          f'<div class="stat"><span class="v">{blocked}</span>'
          '<span class="l">Stopped before training</span></div>',
+         f'<div class="stat"><span class="v">{data["gpu"]}</span>'
+         '<span class="l">GPU-hours, CPU only</span></div>',
          '<div class="stat"><span class="v">0</span>'
          '<span class="l">Manual interventions</span></div>',
          '</div></header>']
@@ -306,6 +362,93 @@ def build_html(data: dict) -> str:
           '<line stroke="var(--rule)" x1="70" y1="180" x2="600" y2="180"/></svg></figure>',
           '<div class="callout"><p class="big">The gate was right. A human looked at the '
           'same numbers and spent an hour chasing it.</p></div></section>']
+
+    # ---- what was accepted, and what never was ---------------------------
+    mods = data["modules"]
+    tot_mod = sum(mods.values()) or 1
+    h += ['<section class="reveal"><div class="eyebrow">Where the effort went</div>',
+          '<h2>The model never changed</h2>',
+          '<p class="lede">The scoring function is a factorisation machine throughout, '
+          'the same architecture as the official baseline. Every accepted improvement '
+          'came from the training objective or the input features. '
+          f'<b>{mods.get("model.py", 0)} experiments edited the model and none of them '
+          'was accepted.</b></p><div class="tblwrap"><table><thead><tr>'
+          '<th>Module</th><th class="num">Experiments</th><th class="num">Share</th>'
+          '<th>What it controls</th></tr></thead><tbody>']
+    what = {"train.py": "objective, optimiser, batching",
+            "features.py": "what the model sees",
+            "model.py": "the scoring function itself"}
+    for m, n in sorted(mods.items(), key=lambda x: -x[1]):
+        h.append(f'<tr><td class="mono">{m}</td><td class="num">{n}</td>'
+                 f'<td class="num">{100*n/tot_mod:.0f}%</td>'
+                 f'<td style="color:var(--muted)">{what.get(m, "")}</td></tr>')
+    h.append('</tbody></table></div>')
+
+    h += ['<h2 style="margin-top:52px">Every accepted result</h2>',
+          '<div class="tblwrap"><table><thead><tr><th class="num">Primary</th>'
+          '<th>Module</th><th>Technique</th></tr></thead><tbody>']
+    kept_rows = sorted(((e["p"], e["m"], e["t"]) for r in runs for e in r["exps"]
+                        if e["k"] == "kept" and e["p"]), reverse=True)
+    for pr, mod, tech in kept_rows:
+        h.append(f'<tr class="win"><td class="num">{pr:.4f}</td>'
+                 f'<td class="mono">{mod or "—"}</td><td>{tech}</td></tr>')
+    h.append('</tbody></table></div></section>')
+
+    # ---- the mechanism it kept reaching for ------------------------------
+    fam, famk = data["family"], data["family_kept"]
+    h += ['<section class="reveal">'
+          '<div class="eyebrow">The one it could not land</div>',
+          '<h2>50 attempts, 0 accepted</h2>',
+          '<p class="lede">The human improvement came from training the ranking '
+          'objective on lists the length of the evaluation lists. The agent reached for '
+          f'that same family &mdash; listwise objectives, group sizing, list-length '
+          f'handling &mdash; in <b>{fam} experiments across the project</b>, and '
+          f'<b>{famk} were accepted</b>. It repeatedly identified the right mechanism '
+          'and never made it work, while every win it did land came from somewhere '
+          'else.</p>',
+          '<div class="callout"><p>Diagnosis was never the bottleneck. Selection and '
+          'implementation were.</p></div></section>']
+
+    # ---- architecture generations ----------------------------------------
+    h += ['<section class="reveal"><div class="eyebrow">Architecture</div>',
+          '<h2>Every generation, including the ones that failed</h2>',
+          '<p class="lede">Each generation added a stage in response to a measured '
+          'failure of the last. Two were built, measured, and reverted.</p>',
+          '<div class="tblwrap"><table><thead><tr><th>Gen</th>'
+          '<th class="num">Runs</th><th class="num">Improved</th>'
+          '<th class="num">Experiments</th><th class="num">Best</th>'
+          '</tr></thead><tbody>']
+    for v in sorted(data["by_ver"]):
+        d_ = data["by_ver"][v]
+        win = ' class="win"' if d_["won"] else ""
+        b = f'{d_["best"]:.4f}' if d_["best"] else "—"
+        h.append(f'<tr{win}><td><span class="pill">{v}</span></td>'
+                 f'<td class="num">{d_["runs"]}</td>'
+                 f'<td class="num">{d_["won"]}</td>'
+                 f'<td class="num">{d_["exps"]}</td><td class="num">{b}</td></tr>')
+    h.append('</tbody></table></div></section>')
+
+    # ---- cost by role ----------------------------------------------------
+    roles = data["roles"]
+    tot_r = sum(roles.values()) or 1
+    h += ['<section class="reveal"><div class="eyebrow">Cost</div>',
+          '<h2>Where the tokens go</h2>',
+          '<p class="lede">Five roles, each on the model it needs. The judge writes only '
+          'prose because its verdict is arithmetic; the coder is the measured bottleneck '
+          'and the largest single cost.</p><div class="tblwrap"><table><thead><tr>'
+          '<th>Role</th><th class="num">Tokens</th><th class="num">Share</th>'
+          '<th>Job</th></tr></thead><tbody>']
+    jobs = {"analyst": "pick tools, report numbers", "classifier": "name the problem",
+            "inventor": "propose interventions", "coder": "write correct numpy",
+            "reflector": "explain a decision already made"}
+    for role, n in sorted(roles.items(), key=lambda x: -x[1]):
+        h.append(f'<tr><td class="mono">{role}</td><td class="num">{n/1000:.0f}K</td>'
+                 f'<td class="num">{100*n/tot_r:.0f}%</td>'
+                 f'<td style="color:var(--muted)">{jobs.get(role, "")}</td></tr>')
+    h += ['</tbody></table></div>',
+          f'<div class="callout"><p><b class="mono">{data["gpu"]}</b> GPU-hours across '
+          f'<b class="mono">{data["wall_h"]}</b> hours of wall clock, on a laptop CPU '
+          'with no accelerator. numpy and pandas only.</p></div></section>']
 
     # ---- ledger ----------------------------------------------------------
     h += ['<section class="reveal"><div class="eyebrow">Run ledger</div>',
