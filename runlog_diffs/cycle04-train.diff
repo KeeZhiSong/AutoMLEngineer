@@ -1,0 +1,88 @@
+--- a/solution/train.py
++++ b/solution/train.py
+@@ -203,6 +203,33 @@
+     return None if size >= full_len else max(1, size)
+ 
+ 
++def _positive_rate_weights(y: np.ndarray) -> tuple[np.ndarray, float, float, float]:
++    """sample-weighting: train-only class weights from positive-rate discrepancy.
++
++    Positives receive weight proportional to neg_rate / pos_rate, so when
++    positives are overrepresented their per-row contribution is reduced. We then
++    normalise the weights to mean 1 to keep the learning-rate scale close to the
++    unweighted baseline.
++    """
++    label = y > 0.5
++    pos_rate = float(np.mean(label)) if len(label) else 0.0
++    eps = 1e-6
++
++    if pos_rate <= eps or pos_rate >= 1.0 - eps:
++        weights = np.ones(len(y), dtype=np.float32)
++        return weights, pos_rate, 1.0, 1.0
++
++    neg_rate = 1.0 - pos_rate
++    raw_pos_w = neg_rate / pos_rate
++    raw_neg_w = 1.0
++    mean_w = pos_rate * raw_pos_w + neg_rate * raw_neg_w
++
++    pos_w = raw_pos_w / mean_w
++    neg_w = raw_neg_w / mean_w
++    weights = np.where(label, pos_w, neg_w).astype(np.float32)
++    return weights, pos_rate, float(pos_w), float(neg_w)
++
++
+ class Adam:
+     """Adam, matching the official baseline's hyperparameters."""
+ 
+@@ -235,6 +262,18 @@
+     p = sigmoid(z)
+     dz = ((p - y) / len(y)).astype(np.float32)
+     loss = float(-np.mean(y * np.log(p + 1e-9) + (1 - y) * np.log(1 - p + 1e-9)))
++    return dz, loss
++
++
++def _weighted_pointwise_logloss(model: FM, X: np.ndarray, y: np.ndarray,
++                                sample_weight: np.ndarray) -> tuple[np.ndarray, float]:
++    """sample-weighting: pointwise logloss with per-row training weights."""
++    z, _, _ = model.logits(X)
++    p = sigmoid(z)
++    w = sample_weight.astype(np.float32, copy=False)
++    ce = -(y * np.log(p + 1e-9) + (1 - y) * np.log(1 - p + 1e-9))
++    dz = (((p - y) * w) / len(y)).astype(np.float32)
++    loss = float(np.mean(w * ce))
+     return dz, loss
+ 
+ 
+@@ -260,6 +299,15 @@
+     max_epochs = int(cfg.get("epochs", 40))
+     patience = int(cfg.get("patience", 4))
+     seed = int(cfg.get("seed", 0))
++
++    # sample-weighting: enable inverse positive-rate weighting by default for
++    # the built-in pointwise objective, using TRAIN labels only.
++    sample_weighting = _as_bool(cfg.get("sample_weighting", True))
++    train_sample_weight = None
++    if sample_weighting and loss_fn is pointwise_logloss:
++        train_sample_weight, train_pos_rate, pos_w, neg_w = _positive_rate_weights(train_enc.y)
++        log(f"  sample-weighting | train positive rate {train_pos_rate:.4f} "
++            f"| pos_w {pos_w:.4f} neg_w {neg_w:.4f}")
+ 
+     # curriculum-learning: enable a length ramp by default; callers can set
+     # curriculum=False to recover fixed group_size / row batching behaviour.
+@@ -301,9 +349,15 @@
+         for idx in batches:
+             Xb, yb = train_enc.X[idx], train_enc.y[idx]
+ 
++            # sample-weighting: apply positive-rate inverse weights inside the
++            # built-in loss computation, aligned with the same batch indices.
++            if train_sample_weight is not None:
++                dz, loss = _weighted_pointwise_logloss(
++                    model, Xb, yb, train_sample_weight[idx]
++                )
+             # A grouped loss needs the batch's user ids; a pointwise one does
+             # not. Pass them only when the loss accepts them.
+-            if _takes_user_id(loss_fn):
++            elif _takes_user_id(loss_fn):
+                 dz, loss = loss_fn(model, Xb, yb, train_enc.user_id[idx])
+             else:
+                 dz, loss = loss_fn(model, Xb, yb)

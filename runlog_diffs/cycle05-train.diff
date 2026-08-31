@@ -1,0 +1,96 @@
+--- a/solution/train.py
++++ b/solution/train.py
+@@ -203,6 +203,82 @@
+     return None if size >= full_len else max(1, size)
+ 
+ 
++def _augment_synthetic_positives(enc: Encoded, cfg: dict, log=print) -> Encoded:
++    """Add one plausible positive duplicate for users with no positive labels."""
++    # data-augmentation: train-only synthetic positives can provide a within-user
++    # ordering signal for users whose observed long_view labels are all zero.
++    if not _as_bool(cfg.get("synthetic_positive_aug", True)):
++        return enc
++    if len(enc.y) == 0:
++        return enc
++
++    X = enc.X
++    y_pos = (enc.y > 0).astype(np.float32)
++    if float(y_pos.sum()) <= 0.0:
++        return enc
++
++    n, f = X.shape
++    global_rate = float((y_pos.sum() + 1.0) / (n + 2.0))
++
++    # data-augmentation: estimate feature/positive correlations from TRAIN rows
++    # only, then use them to pick the most plausible item already shown to each
++    # all-negative user. Encoded feature ids already include field offsets.
++    flat = X.reshape(-1)
++    dim = int(flat.max()) + 1 if flat.size else 0
++    counts = np.bincount(flat, minlength=dim).astype(np.float32)
++    pos_counts = np.bincount(flat, weights=np.repeat(y_pos, f),
++                             minlength=dim).astype(np.float32)
++    alpha = float(cfg.get("synthetic_positive_smoothing", 20.0))
++    feat_rate = (pos_counts + alpha * global_rate) / (counts + alpha)
++    feat_lift = np.log((feat_rate + 1e-6) / (global_rate + 1e-6)).astype(np.float32)
++    row_score = feat_lift[X].mean(axis=1).astype(np.float32)
++
++    # data-augmentation: blend in raw video_id prior as an item-side correlation
++    # signal; this is learned on train labels only and is not added to X.
++    vids, inv = np.unique(enc.video_id, return_inverse=True)
++    vid_counts = np.bincount(inv).astype(np.float32)
++    vid_pos = np.bincount(inv, weights=y_pos).astype(np.float32)
++    vid_alpha = float(cfg.get("synthetic_positive_video_smoothing", 5.0))
++    vid_rate = (vid_pos + vid_alpha * global_rate) / (vid_counts + vid_alpha)
++    vid_lift = np.log((vid_rate + 1e-6) / (global_rate + 1e-6)).astype(np.float32)
++    row_score += 0.5 * vid_lift[inv]
++
++    order, starts, lengths = group_segments(enc.user_id)
++    pos_per_user = segment_sum(y_pos[order], starts)
++    selected = []
++    for st, ln, has_pos in zip(starts, lengths, pos_per_user > 0):
++        if has_pos:
++            continue
++        g = order[st:st + ln]
++        selected.append(int(g[np.argmax(row_score[g])]))
++
++    if not selected:
++        return enc
++
++    selected = np.asarray(selected, dtype=np.int64)
++
++    # data-augmentation: keep augmentation bounded so noisy pseudo-labels cannot
++    # dominate observed interactions.
++    max_frac = float(cfg.get("synthetic_positive_max_frac", 0.25))
++    max_add = int(max(1, round(max_frac * n)))
++    if len(selected) > max_add:
++        keep = np.argsort(row_score[selected])[::-1][:max_add]
++        selected = selected[keep]
++
++    aux = {k: np.concatenate([v, v[selected]], axis=0)
++           for k, v in enc.aux.items()}
++    out = Encoded(
++        X=np.concatenate([enc.X, enc.X[selected]], axis=0),
++        y=np.concatenate([enc.y, np.ones(len(selected), dtype=np.float32)], axis=0),
++        user_id=np.concatenate([enc.user_id, enc.user_id[selected]], axis=0),
++        aux=aux,
++        video_id=np.concatenate([enc.video_id, enc.video_id[selected]], axis=0),
++    )
++    log(f"  data-augmentation: added {len(selected)} synthetic positive rows "
++        f"for all-negative users")
++    return out
++
++
+ class Adam:
+     """Adam, matching the official baseline's hyperparameters."""
+ 
+@@ -260,6 +336,10 @@
+     max_epochs = int(cfg.get("epochs", 40))
+     patience = int(cfg.get("patience", 4))
+     seed = int(cfg.get("seed", 0))
++
++    # data-augmentation: augment TRAIN only; validation remains untouched for
++    # leakage-free early stopping and scoring.
++    train_enc = _augment_synthetic_positives(train_enc, cfg, log=log)
+ 
+     # curriculum-learning: enable a length ramp by default; callers can set
+     # curriculum=False to recover fixed group_size / row batching behaviour.

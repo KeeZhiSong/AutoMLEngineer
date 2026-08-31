@@ -187,13 +187,23 @@ class ExperimentLedger:
         return seen
 
     def resource_totals(self) -> dict:
-        """Totals for the Feasibility & Practicality deliverable."""
+        """Totals for the Feasibility & Practicality deliverable.
+
+        The record count is reported as "experiments", NOT "cycles". One cycle
+        writes one record, but an accepted cycle also writes one record per
+        EXPLOIT trial, so the two counts diverge exactly on the runs that won.
+        This key used to be called "cycles", and the controller spreads these
+        totals over its own summary dict -- so it silently overwrote the loop
+        counter, and every winning run reported cycles + exploit trials as its
+        iteration count. Runs written before this fix (workspace_final among
+        them) carry the inflated figure under "cycles" in summary.json.
+        """
         entries = self.all()
         return {
             "tokens_in": sum(int(e.get("tokens_in", 0)) for e in entries),
             "tokens_out": sum(int(e.get("tokens_out", 0)) for e in entries),
             "gpu_hours": round(sum(float(e.get("gpu_seconds", 0.0)) for e in entries) / 3600.0, 3),
-            "cycles": len(entries),
+            "experiments": len(entries),
             "manual_interventions": sum(1 for e in entries if e.get("manual_intervention")),
         }
 

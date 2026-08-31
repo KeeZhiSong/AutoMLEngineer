@@ -201,7 +201,7 @@ after succeeding. Convergence is not evaluated on a winning cycle.
 |---|---|
 | AST leak scan (pre-execution) | 11 attempts to read a feedback column as an input, across 8 runs |
 | row-count invariant | a patch that padded the scored set 124,909 -> 451,647 rows |
-| semantic contract | patches that read as the intervention and changed nothing: 101 of 374 experiments |
+| semantic contract | patches that read as the intervention and changed nothing: 102 of 387 experiments |
 | 5-seed tie-break | apparent wins of +0.0010 and +0.0012 that averaged to +0.0004 |
 | failure classification | a broken implementation recorded as evidence against the idea it botched |
 | contract sanitisation | contracts forbidding their own intervention |
@@ -272,8 +272,9 @@ from this configuration** and passes the organisers' checker.
 
 It reaches the human score by a different route: curriculum learning over
 sequence length plus a length-normalisation feature, rather than the human's
-listwise objective and retuned learning rate. The run converged in 13 of the 50
-permitted iterations on 105,304 tokens and 59 minutes. Across V4–V6 the loop
+listwise objective and retuned learning rate. The run converged in 5 of the 50
+permitted iterations (13 logged experiments, 8 of them EXPLOIT trials) on
+105,304 tokens and 59 minutes. Across V4–V6 the loop
 improves on **8 of 11 clean-reference runs**; the three generations before that
 produced zero improvements in 70+ cycles.
 
@@ -288,6 +289,30 @@ Full results, the run-by-run reliability record, the seven directions closed by
 measurement, and an honest accounting of every false win, the agent's two and
 the harness's ten, are in [`RESULTS.md`](RESULTS.md).
 
+## Where each deliverable lives
+
+| deliverable | file |
+|---|---|
+| written project description | [`DEVPOST.md`](DEVPOST.md) |
+| per-iteration run log | [`RUNLOG.md`](RUNLOG.md), generated from `workspace_final/experiments.jsonl` by `tools_build_runlog.py`; the unified diff applied in each cycle is in [`runlog_diffs/`](runlog_diffs/) |
+| raw run logs, every run | `workspace_final/`, `workspace_*/`, `archive/runs/` |
+| manual-intervention summary | [`RUNLOG.md`](RUNLOG.md) and [`RESULTS.md`](RESULTS.md): **0** |
+| final model output | [`submission.csv`](submission.csv), test split, 170,588 rows, passes `official/submit.py --check` |
+| results table + resource usage | [`RESULTS.md`](RESULTS.md) |
+| published search ledger | [`docs/index.html`](docs/index.html) |
+
+```bash
+python3 tools_build_runlog.py           # rebuild RUNLOG.md + runlog_diffs/
+python3 tools_build_runlog.py --check   # exit 1 if it is stale
+```
+
+## Team member contributions
+
+Solo entry. Kee Zhi Song built the whole submission: the frozen evaluation
+harness around the organisers' `official/`, the agent loop and all eleven of its
+stages, the guards, the human-tuned benchmark configuration the agent is
+measured against, and every document here. There are no other contributors.
+
 ## Limitations, and what I would do with more time
 
 **The agent diagnoses better than it implements.** In one 25-cycle run it named
@@ -297,9 +322,10 @@ times. Across the whole project it attempted the family the human fix belongs to
 landed none of them. Selection and implementation are the constraint, not
 perception.
 
-**The margin is thin.** +0.0015 is roughly two seed standard deviations. It is
-5-seed confirmed and reproducible, but it is a small effect on a saturated
-benchmark, not a breakthrough.
+**The margin is thin.** +0.0022 is about 3.0 standard errors once the
+baseline's own 0.0008 seed variance is propagated, not the 6.8 it appears at
+first glance. It is 20-seed confirmed and reproducible, but it is a small effect
+on a saturated benchmark, not a breakthrough.
 
 **It does not improve every run.** 8 of 11 clean-reference runs under V4-V6.
 Run-to-run variance exceeds the difference between architecture generations, so

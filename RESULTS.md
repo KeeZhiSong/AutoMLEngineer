@@ -110,7 +110,8 @@ Deliverables 3 and 4 describe one run. This is it.
 |---|---|
 | run log | `workspace_final/experiments.jsonl` |
 | configuration | `artifacts/agent-best/` |
-| **iterations used** | **13 of the 50 cap**, stopped by convergence |
+| **iterations used** | **5 research cycles of the 50 cap**, stopped by convergence |
+| logged experiments | **13** = the 5 cycles + 8 EXPLOIT trials; 12 were scored training runs |
 | **total tokens (in + out)** | **105,304** |
 | **agent wall-clock** | **59 minutes** |
 | **GPU-hours** | **0.81** (CPU only; no accelerator was used) |
@@ -142,6 +143,15 @@ exploit sweep read 0.6040 on seed 0 and measured 0.6034 across five. It was
 therefore measured at n=20 before being used for anything.
 
 Bonus benchmarks (KuaiRand-1k, KuaiRand-27k) were not attempted.
+
+> **On the two iteration counts.** `workspace_final/summary.json` reports
+> `"cycles": 13`. That field carried the ledger's *record* count, not the loop
+> counter: an accepted cycle writes one record for itself and one more for each
+> EXPLOIT trial it opens, so the two diverge on exactly the runs that won. The
+> loop ran **5 cycles** and logged **13 experiments**. Fixed at source in
+> `lib/ledger.py` (the key is now `experiments`) and in `agent/controller.py`,
+> which was spreading the totals over its own `cycles` value. The run itself is
+> unaffected. `RUNLOG.md` derives both figures directly from the records.
 
 Reproduce:
 
@@ -181,11 +191,12 @@ that already failed.
 
 | | |
 |---|---|
-| research runs executed | 18 with recorded summaries |
-| LLM tokens, all runs | **4,123,811** |
-| GPU-hours, all runs | **4.09** (CPU-only; numpy, no accelerator) |
+| research runs executed | 21 with a committed run log |
+| experiments, all runs | **387** (219 completed, 102 stopped by contract, 49 crashed and recovered, 15 skipped, 2 timed out) |
+| LLM tokens, all runs | **4,341,703** |
+| GPU-hours, all runs | **5.20** (CPU-only; numpy, no accelerator) |
 | single run cost | 82K–466K tokens, 0.02–0.46 GPU-hours |
-| best single run | 0.6030 at 146K tokens, converged in 13 cycles |
+| best single run | 0.6030 at 146K tokens, converged in 9 cycles (13 logged experiments) |
 | manual interventions | **0** in every run |
 | hardware | one laptop CPU; the baseline trains in ~15s |
 

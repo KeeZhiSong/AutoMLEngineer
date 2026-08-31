@@ -632,7 +632,10 @@ def run_loop(data_dir: str,
     _release_lock()
     elapsed = time.time() - started
     totals = led.resource_totals()
+    # totals FIRST, so an explicit key below always wins. Spreading it last let
+    # the ledger's record count overwrite "cycles" with cycles + exploit trials.
     summary = {
+        **totals,
         "stop_reason": stop_reason,
         "cycles": cycle,
         "wall_seconds": round(elapsed, 1),
@@ -650,7 +653,6 @@ def run_loop(data_dir: str,
         "primary_history": primary_history,
         "tokens_by_role": dict(llm.USAGE.by_role),
         "model_routing": {r: llm.model_for(r, llm_model) for r in llm.ROLES},
-        **totals,
     }
 
     logger.info("=" * 72)
