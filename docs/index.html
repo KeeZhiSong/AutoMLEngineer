@@ -103,7 +103,7 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <p class="sub">An autonomous agent ran the machine-learning research loop &mdash; measure, diagnose, invent, implement, verify, decide &mdash; across <b>21 runs</b> with <b>zero manual interventions</b>. This is every experiment it ran, including the ones that failed and the guards that caught them.</p><div class="stats">
 <div class="stat"><span class="v">387</span><span class="l">Experiments</span></div>
 <div class="stat"><span class="v">10</span><span class="l">Accepted</span></div>
-<div class="stat"><span class="v">0.6040</span><span class="l">Best, unaided</span></div>
+<div class="stat"><span class="v">0.6038</span><span class="l">Best unaided, 20-seed</span></div>
 <div class="stat"><span class="v">102</span><span class="l">Stopped before training</span></div>
 <div class="stat"><span class="v">4.9</span><span class="l">GPU-hours, CPU only</span></div>
 <div class="stat"><span class="v">0</span><span class="l">Manual interventions</span></div>
@@ -560,12 +560,12 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <circle fill="var(--kept)" cx="752.0" cy="164.4" r="6"><title>V6 v6c: 0.6022 — temporal-activity-features</title></circle><text class="tick" x="752.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="752.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
 <circle fill="var(--kept)" cx="836.0" cy="126.0" r="6"><title>V6 v6c_gpt55: 0.6030 — focal-loss-weighting</title></circle><text class="tick" x="836.0" y="112.0" text-anchor="middle">0.6030</text><text class="tick" x="836.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
 </svg></figure>
-<div class="callout"><p>The agent reached <b class="mono">0.6031</b> twice, in different architecture generations, both times by reweighting the training objective, and never by the route the human took. Both were confirmed over five seeds by the loop itself before acceptance.</p></div></section>
+<div class="callout"><p>The best of these measures <b class="mono">0.6038</b> over 20 seeds (sd 0.0003), which <b>matches the human-tuned result exactly</b> &mdash; by a different route. The human path was a listwise objective trained on evaluation-length lists plus a retuned learning rate; the agent reached the same score through curriculum learning over sequence length and a length-normalisation feature. It did not rediscover the human path.</p></div></section>
 <section class="reveal"><div class="eyebrow">Why the accept margin exists</div>
 <h2>The win that wasn’t</h2>
 <p class="lede">An exploit trial measured a clear improvement on the first seed. Run on five seeds, it averaged to almost nothing. The keep/revert decision is arithmetic, not a judgement call, and it declined.</p>
 <figure><svg viewBox="0 0 620 250" role="img" aria-label="A +0.0012 single-seed result averaging to +0.0004 over five seeds"><line class="gridline" x1="70" y1="30" x2="600" y2="30"/><text class="lbl" x="606" y="34">accept margin 0.0008</text><rect x="120" y="30" width="120" height="150" fill="var(--crash)" opacity=".85"/><text class="tick" x="180" y="200" text-anchor="middle">seed 0 only</text><text class="lbl" x="180" y="20" text-anchor="middle" fill="var(--crash)">+0.0012</text><rect x="330" y="130" width="120" height="50" fill="var(--kept)" opacity=".85"/><text class="tick" x="390" y="200" text-anchor="middle">mean of 5 seeds</text><text class="lbl" x="390" y="122" text-anchor="middle" fill="var(--kept)">+0.0004</text><line stroke="var(--rule)" x1="70" y1="180" x2="600" y2="180"/></svg></figure>
-<div class="callout"><p class="big">The gate was right. A human looked at the same numbers and spent an hour chasing it.</p></div></section>
+<div class="callout"><p class="big">The gate was right. A human looked at the same numbers and spent an hour chasing it.</p><p style="margin-top:18px;color:var(--muted)">The same rule applied in the other direction on the final run. An accepted result read <b class="mono">0.6040</b> on one seed, and a neighbouring configuration in the same sweep read 0.6040 and measured 0.6034 across five. So it was tested at <b>20 seeds before anything was claimed</b>: mean 0.6038, sd 0.0003, every seed above the baseline. The caution was right to apply, and this time the result survived it.</p></div></section>
 <section class="reveal"><div class="eyebrow">Where the effort went</div>
 <h2>The model never changed</h2>
 <p class="lede">The scoring function is a factorisation machine throughout, the same architecture as the official baseline. Every accepted improvement came from the training objective or the input features. <b>35 experiments edited the model and none of them was accepted.</b></p><div class="tblwrap"><table><thead><tr><th>Module</th><th class="num">Experiments</th><th class="num">Share</th><th>What it controls</th></tr></thead><tbody>
@@ -640,7 +640,7 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <tr><td class="mono">v8</td><td><span class="pill">V8</span></td><td class="num">5</td><td class="num">100%</td><td class="num">0</td><td class="num">—</td><td class="num">—</td><td class="mono" style="font-size:11.5px;color:var(--muted)">—</td></tr>
 <tr><td class="mono">v8b</td><td><span class="pill">V8</span></td><td class="num">25</td><td class="num">40%</td><td class="num">0</td><td class="num">—</td><td class="num">466K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">max_iterations</td></tr>
 </tbody></table></div></section>
-<footer>Generated by <span class="mono">tools_build_ledger.py</span> from the committed run logs in <span class="mono">workspace*/experiments.jsonl</span>. Baseline 0.6016 &middot; agent 0.6031 &middot; human-tuned 0.6038 &middot; oracle ceiling 0.8484.</footer></div>
+<footer>Generated by <span class="mono">tools_build_ledger.py</span> from the committed run logs in <span class="mono">workspace*/experiments.jsonl</span>. Baseline 0.6016 &middot; agent 0.6038 (20-seed) &middot; human-tuned 0.6038 &middot; oracle ceiling 0.8484.</footer></div>
 <script>
 const tip=document.getElementById('tip');
 document.querySelectorAll('.cell').forEach(c=>{
