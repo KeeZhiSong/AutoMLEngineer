@@ -59,9 +59,16 @@ solution/
   train.py    AGENT-EDITABLE  ─┘
   eda.py      FROZEN. 9 dataset-inspection tools. Neutral numbers, no
               interpretation — a tool that flags a finding leaks the answer.
-agent/        analyst → classifier → inventor → planner → specifier → coder
-              → reflector → exploiter (on a keep only)
-              anomalies.py: named problems persist across cycles
+agent/        analyst.py     OBSERVE  — 3 of 9 neutral measurement tools
+              classifier.py  CLASSIFY — measurements → a named problem
+              anomalies.py   BOARD    — problems persist across cycles
+              inventor.py    INVENT   — open-ended, optional literature pull
+              planner.py     PLAN     — 4 implementations, scored
+              specifier.py   SPECIFY  — the contract, before the code
+              coder.py       CODE     — rewrites one editable module
+              reflector.py   JUDGE    — arithmetic keep/revert + failure type
+              exploiter.py   EXPLOIT  — on a keep only
+              controller.py  the loop itself
 lib/          techniques.jsonl + beliefs.py (claims WITH contradicting evidence)
               llm.py: per-role model routing
 tests/        contract tests for the silent-failure cases
@@ -74,64 +81,148 @@ reverted — they fixed the failures they targeted without producing a win. That
 work is preserved on branch `v7-v8-investigation`, and `RESULTS.md` explains
 what it established.
 
-## How the loop works
+## The research loop
 
-1. **Analyst** measures the data. Cycles 1–2 are *scheduled* to cover the
-   distribution, label, ranking-context and cardinality families; free choice
-   resumes at cycle 3. Scheduling exists because it was measured that the
-   analyst chose `cold_start_rates` — a dead end — in 100% of 14 logged cycles,
-   and the two tools revealing the decisive fact in 14% and 0%. Nothing
-   downstream can name a problem it was never shown.
-2. **Classifier** turns the numbers into a *named problem* — e.g. "train/eval
-   distribution mismatch, dimension = list length, ratio 6x". A fact suggests
-   nothing; a named problem is what an intervention attaches to.
-3. **Anomaly board** keeps named problems alive across cycles, merging
-   re-sightings and recording what has been tried. Without it one run diagnosed
-   the same decisive problem in four separate cycles as four fresh discoveries,
-   and followed up on none. A no-op does **not** retire an anomaly: an idea that
-   was never really tested is still open.
-4. **Inventor** proposes interventions open-ended, with **no technique menu in
-   front of it**, then may *request* literature for its problem class. Pull, not
-   push — retrieval after invention informs a hypothesis the agent already owns.
-5. **Planner** enumerates four ways to implement the committed hypothesis and
-   scores them on directness, fidelity, isolation and cost. A plan that cannot
-   name a measurable quantity it moves is disqualified, not merely penalised —
-   it could not be given a contract, so it could not be verified.
-6. **Specifier** writes a semantic contract *before the code exists* — a handful
-   of measurable claims about what the patch must change. `instrument.py` checks
-   them in 0.4s without training, so a patch that changes nothing never costs a
-   run.
-7. **Coder** rewrites exactly one module. Syntax-, import- and leak-checked
-   before it is allowed to cost a training run.
-8. **Reflector** decides keep/revert **arithmetically** — only if primary beats
-   the incumbent by more than one published std (0.0008). The LLM writes the
-   explanation, never the verdict. Failures are classified
-   implementation / optimisation / **scientific**, and only the last may weaken
-   a belief — a broken patch is not evidence against the idea it botched.
-9. **Exploiter** (on a keep only) spends up to 4 trials retuning a parameter the
-   intervention made stale. Which parameter is derived from *what measurably
-   changed*: a new feature points at capacity and regularisation, a batching or
-   objective change points at the step size. Fired on five live wins — one from a
-   deliberately handicapped reference, to exercise the branch on demand — and
-   declined all five as inside the accept margin. **Zero false wins.** In one
-   case a trial looked like +0.0012 on seed 0 and averaged to +0.0004 over five
-   seeds, which is exactly the error the margin exists to catch.
+One pass is a **cycle**. A run is 25 cycles, or until the convergence rule fires.
+There is always an *incumbent* — the best configuration so far — and each cycle
+tests exactly one change against it.
 
-Guards, each added because something got past the previous set:
+```
+                          ┌──────────── RETRIEVAL (optional) ───────┐
+                          │                                         ▼
+OBSERVE ─► CLASSIFY ─► ANOMALY BOARD ─────────────────────────► INVENT ─► PLAN
+                                                                            │
+   ┌────────────────────────────────────────────────────────────────────────┘
+   ▼
+SPECIFY ─► CODE ─► VERIFY ─► RUN ─┬─► ERROR ─► RECOVERY ──┐
+                                  └─► SUCCESS ─► JUDGE    │
+                                                  │       │
+                                    REJECT ◄──────┴──────►│ KEEP
+                                                          ▼
+                                          WIN ANALYSIS ─► EXPLOIT (retune │ dose)
+                                                          ▼
+                                                       MEMORY ─► next cycle
+```
+
+### 1 · OBSERVE — `agent/analyst.py`
+Runs 3 of 9 tools from `solution/eda.py`. Every tool returns **neutral numbers
+and no interpretation** — a tool that flags a finding has leaked the answer.
+
+Tool families: distribution, ranking context, labels, temporal, cardinality,
+cold-start/sparsity. **Cycles 1–2 are scheduled** to guarantee coverage; free
+choice resumes at cycle 3, with unvisited families surfaced in the prompt.
+
+*Why scheduled:* across 14 logged cycles the analyst chose `cold_start_rates` —
+a measured dead end — in **100%** of them, and the two tools that reveal the
+decisive train/eval list-size mismatch in **14% and 0%**. Nothing downstream can
+name a problem it was never shown.
+
+Writes: `observations` onto the cycle's ledger record.
+
+### 2 · CLASSIFY — `agent/classifier.py`
+Turns measurements into a **named problem** with a type, dimension and
+magnitude. `train median 31, valid median 4` is a fact; *"train/eval mismatch,
+dimension = ranking-context length, ratio ~8×"* is something an intervention can
+attach to. May return **no problem**, in which case the cycle is skipped rather
+than filled with something plausible.
+
+### 3 · ANOMALY BOARD — `agent/anomalies.py`
+Named problems persist across cycles. A re-sighting **merges** into the existing
+entry (matched on problem class plus a shared statistic) and raises confidence;
+a faithful failed attempt lowers it. Each entry carries its full attempt history.
+
+*The load-bearing rule:* **a no-op does not retire an anomaly.** If the patch
+changed nothing, the idea was never tested, so the problem stays open.
+
+Writes: `workspace/anomalies.jsonl`.
+
+### 4 · INVENT — `agent/inventor.py`
+Proposes interventions **open-ended, with no technique library visible**. It may
+then *request* literature for its problem class — pull, not push, so retrieval
+informs a hypothesis the agent already owns. Retrieval is a second model call,
+not a corpus lookup. Commits to one intervention with a kill criterion.
+
+### 5 · PLAN — `agent/planner.py`
+Enumerates **four implementations** of the committed hypothesis and scores them
+on directness, fidelity, isolation and cost.
+
+A plan that cannot name a measurable quantity it moves is **disqualified, not
+penalised** — no contract could be written for it, so it could not be verified
+before spending a training run.
+
+### 6 · SPECIFY — `agent/specifier.py`
+Writes the **semantic contract before the code exists**: postconditions the
+patch must cause, plus invariants it must not break. If the coder wrote first it
+would author a gate its own patch satisfies.
+
+`sanitise_contract()` drops postconditions nothing can satisfy and invariants
+that contradict the intervention — an "add a feature" idea cannot be gated on
+the embedding table staying the same size.
+
+### 7 · CODE — `agent/coder.py`
+Rewrites exactly one of `features.py`, `model.py`, `train.py`. Syntax-, import-
+and leak-checked before it may cost a training run. Everything else — loader,
+scorer, runner — is frozen, so the agent can change the model but never what is
+measured.
+
+### 8 · VERIFY — `solution/instrument.py`
+**24 measurements in 0.4 seconds, no training.** Checks the patch is valid, safe
+(no feedback-column leakage, row alignment intact) and *faithful* — did it move
+the quantity it claimed? A contract failure skips training entirely.
+
+### 9 · RUN — `solution/runner.py`
+Trains and scores through the frozen pipeline, 900s cap. A crash is returned as
+a **result**, not an exception: `ERROR → RECOVERY` restores the module from
+snapshot and the loop continues.
+
+### 10 · JUDGE — `agent/reflector.py`
+Keep or revert, decided **arithmetically**: the result must beat the incumbent by
+more than one published seed std (**0.0008**). Anything landing within 0.0016 is
+automatically re-run on **5 seeds** first. The model writes the explanation,
+never the verdict.
+
+Failures are typed `implementation` / `optimisation` / **`scientific`**, and only
+the last may weaken a belief — a patch that crashed says nothing about the idea.
+A near miss within 0.010 is held for up to 2 revisions.
+
+### 11 · EXPLOIT — `agent/exploiter.py` *(on a keep only)*
+A win is a new local research problem. Up to 4 trials **retune** a parameter the
+intervention made stale, or **dose** its strength to tell a plateau from a lucky
+point. Which parameter is derived from what measurably changed: a new feature
+points at capacity and regularisation; a change to the objective or batching
+points at the step size.
+
+Fired on five live wins; declined all five as inside the accept margin. **Zero
+false wins.**
+
+### 12 · MEMORY
+`experiments.jsonl` (one record per cycle, with its observations and diff),
+`anomalies.jsonl`, `beliefs.jsonl` (claims stored *with* contradicting
+evidence), `INSIGHTS.md` / `DEAD_ENDS.md`, and `summary.json` at exit.
+
+### Convergence
+Converged when validation primary has not improved by more than **ε = 0.002**
+over **3 consecutive** cycles. Note the tension: no single step on this task has
+ever gained that much, so every genuine win is sub-ε and the run stops shortly
+after succeeding. Convergence is not evaluated on a winning cycle.
+
+## Guards, each added because something got past the previous set
 
 | guard | what it caught |
 |---|---|
 | AST leak scan (pre-execution) | 11 attempts to read a feedback column as an input, across 8 runs |
 | row-count invariant | a patch that padded the scored set 124,909 → 451,647 rows |
-| 5-seed tie-break | a "win" that averaged back to baseline over five seeds |
+| semantic contract | patches that read as the intervention and changed nothing — 101 of 374 experiments |
+| 5-seed tie-break | apparent wins of +0.0010 and +0.0012 that averaged to +0.0004 |
+| failure classification | a broken implementation recorded as evidence against the idea it botched |
+| contract sanitisation | contracts forbidding their own intervention |
 | implausible-gain flag | any single-cycle jump > 0.02 of a 0.247 total headroom |
 | per-cycle timeout | one experiment that ate 98% of a run's compute |
 | divergence abort | training that falls below the random-scoring floor |
+| exit-restore + preflight-by-score | a run launched from the wrong code — verified by SCORE, never by filename |
 | loop lockfile | a second writer corrupting an in-flight experiment |
-| semantic contract | patches that read as the intervention and change nothing — the single most common failure |
-| failure classification | a broken implementation recorded as evidence against the idea it botched |
-| contract sanitisation | contracts forbidding their own intervention, e.g. "add a feature" gated on `embedding_dim_total unchanged` |
-| exit-restore + preflight-by-score | a run launched from the wrong code, verified by SCORE rather than by filename |
+
+Before the leak guard existed, one such patch scored **0.6449** and was accepted.
 
 ## What we deliberately do not use
 
