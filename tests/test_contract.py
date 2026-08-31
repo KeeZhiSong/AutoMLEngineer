@@ -98,7 +98,13 @@ def test_revision_state_machine():
     from agent.controller import TIEBREAK_BAND
     from agent.reflector import MARGIN
 
-    assert MAX_REVISIONS >= 1
+    # MAX_REVISIONS is 0: measured across 20 runs, 93 revisions were attempted
+    # and none was ever accepted, at a cost of 16% of the project's tokens. The
+    # bound must stay non-negative and finite; whether it is currently 0 is a
+    # budget decision, not a contract.
+    assert MAX_REVISIONS >= 0 and MAX_REVISIONS < 10
+    # The band logic below must stay correct whether or not revisions are on, so
+    # raising MAX_REVISIONS again cannot silently reintroduce a broken gate.
     # A near miss must be a wider band than the noise margin, or nothing is ever
     # worth revising.
     assert PROMISING_GAP > MARGIN, (PROMISING_GAP, MARGIN)
@@ -111,7 +117,8 @@ def test_revision_state_machine():
     assert 0 <= incumbent - 0.5990 < PROMISING_GAP
     # far below -> discard, do not burn revisions on it
     assert not (incumbent - 0.5171 < PROMISING_GAP)
-    print(f"  revision state machine OK (max {MAX_REVISIONS}, "
+    state = "disabled" if MAX_REVISIONS == 0 else f"max {MAX_REVISIONS}"
+    print(f"  revision state machine OK ({state}, "
           f"gap {PROMISING_GAP}, tiebreak {TIEBREAK_BAND})")
 
 

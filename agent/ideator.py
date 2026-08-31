@@ -31,9 +31,20 @@ logger = logging.getLogger("amra.ideator")
 TECHNIQUES_PATH = ROOT / "lib" / "techniques.jsonl"
 MODULES = ("features.py", "model.py", "train.py")
 
-# How many times the loop may revise one idea before it must move on. Bounded so
-# a stubborn dead end cannot consume the whole iteration budget.
-MAX_REVISIONS = 2
+# How many times the loop may revise one idea before it must move on.
+#
+# MEASURED, across 20 runs: 93 revision cycles were attempted and **none was ever
+# accepted**. The best a revision ever scored was 0.6019, below the 0.6031
+# incumbent it was trying to beat. They consumed 675,815 tokens, 16% of the
+# project's entire spend, for zero accepted results.
+#
+# Set to 0 on that evidence. The anomaly board now does the job revisions were
+# meant to do: a near miss stays on the board with its attempt history, so the
+# idea remains available to a later cycle without re-running the whole loop
+# against a patch that already failed.
+#
+# Raise it if you want the mechanism back; nothing else depends on it being 0.
+MAX_REVISIONS = 0
 
 # A result within this much of the incumbent is worth revising rather than
 # discarding. Wider than the noise margin -- a near miss is a tuning problem.
