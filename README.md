@@ -298,6 +298,18 @@ Model ids beginning `claude-` route to Anthropic automatically (needs
 `ANTHROPIC_API_KEY` and the `anthropic` SDK). Per-role token usage is reported
 in `summary.json` under `tokens_by_role`, alongside the routing actually used.
 
+### Why every default is an OpenAI model
+
+Because that is the subscription I had, and it offered the best balance of price
+and quality available to me — not because OpenAI models were compared against
+others and found better for this task. **No cross-provider comparison was run**,
+so nothing here should be read as a claim about relative model quality.
+
+The routing layer is provider-agnostic by design: a role is a name, and any
+model id can be pointed at it. The `gpt-4o` vs `gpt-5.5` comparison below is a
+within-provider result and is the only model comparison this project actually
+measured.
+
 Measured, same architecture and budget with only the coder changed: `gpt-4o`
 produced 3 crashes, 0 keeps and used 313K tokens; **`gpt-5.5` produced 0
 crashes, a keep at 0.6030, and used 146K** — cheaper overall, because better
