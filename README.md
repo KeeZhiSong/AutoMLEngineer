@@ -279,6 +279,45 @@ Full results, the run-by-run reliability record, the seven directions closed by
 measurement, and an honest accounting of every false win, the agent's two and
 the harness's ten, are in [`RESULTS.md`](RESULTS.md).
 
+## Limitations, and what I would do with more time
+
+**The agent diagnoses better than it implements.** In one 25-cycle run it named
+the decisive problem four times and converted it into a working patch zero
+times. Across the whole project it attempted the family the human fix belongs to
+(listwise objectives, group sizing, list-length handling) in 50 experiments and
+landed none of them. Selection and implementation are the constraint, not
+perception.
+
+**The margin is thin.** +0.0015 is roughly two seed standard deviations. It is
+5-seed confirmed and reproducible, but it is a small effect on a saturated
+benchmark, not a breakthrough.
+
+**It does not improve every run.** 7 of 10 clean-reference runs under V4-V6.
+Run-to-run variance exceeds the difference between architecture generations, so
+no version is separable from another by result alone.
+
+**Seven directions are closed by measurement**, so the practical ceiling for
+this approach looks like ~0.604 against an oracle of 0.8484. Getting past that
+needs a different mechanism, not more tuning.
+
+**The specification is the bottleneck, not the coder.** Given a detailed brief,
+a strong model implements the decisive mechanism correctly (0.6037). Given the
+planner's two-sentence brief, the same model produces no-ops. That is the
+sharpest lever I did not get to pull.
+
+### With more time
+
+1. **Write better specifications, not better plans.** The planner picks the
+   right intervention far more often than the coder implements it. A richer
+   brief (the causal control point, the existing helpers to call, the gradient
+   contract to satisfy) is cheaper than a bigger model.
+2. **Let one intervention span the objective and its activating config.** The
+   human fix is a listwise loss *and* evaluation-length grouping; neither helps
+   alone. A loop that changes exactly one thing per cycle cannot express it.
+3. **Give OBSERVE a reason to vary.** It self-corrects over a long run, but the
+   opening cycles still decide much of what gets explored.
+4. **Bonus benchmarks.** KuaiRand-1k and 27k were not attempted.
+
 ## Model routing
 
 Each agent role can use a different model, because they need different things.

@@ -102,6 +102,40 @@ verdict sooner. On an isolated grouped-listwise task where `gpt-4o` crashed,
 `gpt-5.5` scored 0.6037 against 0.6036 for the human implementation. `gpt-5.5`
 is now the default coder.
 
+## The submitted run
+
+Deliverables 3 and 4 describe one run. This is it.
+
+| | |
+|---|---|
+| run log | `archive/runs/06-clean-run-14cyc/experiments.jsonl` |
+| configuration | `artifacts/agent-best/` (`weighted-loss-imbalance`, `train.py`) |
+| **iterations used** | **14 of the 50 cap**, stopped by convergence |
+| **total tokens (in + out)** | **142,612** |
+| **agent wall-clock** | **23 minutes** |
+| **GPU-hours** | **0.18** (CPU only; no accelerator was used) |
+| **manual interventions** | **0** |
+
+### Validation-best score, required benchmark
+
+| metric | ours | official baseline | absolute delta |
+|---|---|---|---|
+| GAUC | 0.6694 | 0.6674 | **+0.0020** |
+| nDCG@5 | 0.5367 | 0.5357 | **+0.0010** |
+| primary (mean of the two) | 0.6031 | 0.6016 | **+0.0015** |
+| **score_dataset** (equal-weighted mean of the metric deltas) | | | **+0.0015** |
+
+Five-seed confirmed by the loop itself before acceptance:
+`0.6024 0.6033 0.6037 0.6030 0.6029`.
+
+Bonus benchmarks (KuaiRand-1k, KuaiRand-27k) were not attempted.
+
+Reproduce:
+
+    cp artifacts/agent-best/*.py solution/
+    python3 tools_preflight.py --expect agent      # confirms by score
+    python3 make_submission.py --out submission.csv --hold-test-score
+
 ## Resource report
 
 | | |
