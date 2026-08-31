@@ -99,13 +99,13 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <div id="tip"></div>
 <div class="wrap">
 <header><div class="eyebrow">TikTok TechJam 2026 &middot; Track 2 &middot; KuaiRand-Pure</div>
-<h1>374 experiments.<br>8 of them worked.</h1>
-<p class="sub">An autonomous agent ran the machine-learning research loop &mdash; measure, diagnose, invent, implement, verify, decide &mdash; across <b>20 runs</b> with <b>zero manual interventions</b>. This is every experiment it ran, including the ones that failed and the guards that caught them.</p><div class="stats">
-<div class="stat"><span class="v">374</span><span class="l">Experiments</span></div>
-<div class="stat"><span class="v">8</span><span class="l">Accepted</span></div>
-<div class="stat"><span class="v">0.6031</span><span class="l">Best, unaided</span></div>
-<div class="stat"><span class="v">101</span><span class="l">Stopped before training</span></div>
-<div class="stat"><span class="v">4.09</span><span class="l">GPU-hours, CPU only</span></div>
+<h1>387 experiments.<br>10 of them worked.</h1>
+<p class="sub">An autonomous agent ran the machine-learning research loop &mdash; measure, diagnose, invent, implement, verify, decide &mdash; across <b>21 runs</b> with <b>zero manual interventions</b>. This is every experiment it ran, including the ones that failed and the guards that caught them.</p><div class="stats">
+<div class="stat"><span class="v">387</span><span class="l">Experiments</span></div>
+<div class="stat"><span class="v">10</span><span class="l">Accepted</span></div>
+<div class="stat"><span class="v">0.6040</span><span class="l">Best, unaided</span></div>
+<div class="stat"><span class="v">102</span><span class="l">Stopped before training</span></div>
+<div class="stat"><span class="v">4.9</span><span class="l">GPU-hours, CPU only</span></div>
 <div class="stat"><span class="v">0</span><span class="l">Manual interventions</span></div>
 </div></header>
 <section class="reveal"><div class="eyebrow">The search</div>
@@ -260,271 +260,286 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <i class="cell kept" style="animation-delay:426ms" data-t="V5 agent_derive &middot; cycle 18|temporal-decay-weights|kept|0.6022"></i>
 <i class="cell crash" style="animation-delay:429ms" data-t="V5 agent_derive &middot; cycle 19|adaptive-weighting-unseen-users|crash|—"></i>
 </div></div>
+<div class="runrow"><div class="runlabel"><b>?</b> final</div><div class="cells">
+<i class="cell exploit" style="animation-delay:432ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.5915"></i>
+<i class="cell exploit" style="animation-delay:435ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.5986"></i>
+<i class="cell exploit" style="animation-delay:438ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.6028"></i>
+<i class="cell exploit" style="animation-delay:442ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.6012"></i>
+<i class="cell kept" style="animation-delay:445ms" data-t="? final &middot; cycle 1|curriculum-learning|kept|0.6023"></i>
+<i class="cell trained" style="animation-delay:448ms" data-t="? final &middot; cycle 2|dynamic-interaction-modeling|trained|0.5981"></i>
+<i class="cell exploit" style="animation-delay:451ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.5951"></i>
+<i class="cell exploit" style="animation-delay:454ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.5990"></i>
+<i class="cell exploit" style="animation-delay:458ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.6034"></i>
+<i class="cell exploit" style="animation-delay:461ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.6018"></i>
+<i class="cell kept" style="animation-delay:464ms" data-t="? final &middot; cycle 3|length-normalization|kept|0.6040"></i>
+<i class="cell blocked" style="animation-delay:467ms" data-t="? final &middot; cycle 4|sample-weighting|blocked|—"></i>
+<i class="cell trained" style="animation-delay:470ms" data-t="? final &middot; cycle 5|data-augmentation|trained|0.6037"></i>
+</div></div>
 <div class="runrow"><div class="runlabel"><b>V4</b> run07</div><div class="cells">
-<i class="cell blocked" style="animation-delay:432ms" data-t="V4 run07 &middot; cycle 1|hybrid-cold-start|blocked|—"></i>
-<i class="cell skipped" style="animation-delay:435ms" data-t="V4 run07 &middot; cycle 2|—|skipped|—"></i>
-<i class="cell skipped" style="animation-delay:438ms" data-t="V4 run07 &middot; cycle 3|—|skipped|—"></i>
-<i class="cell trained" style="animation-delay:442ms" data-t="V4 run07 &middot; cycle 4|loss-function-modification|trained|0.5995"></i>
-<i class="cell trained" style="animation-delay:445ms" data-t="V4 run07 &middot; cycle 5|loss-function-modification|trained|0.5995"></i>
-<i class="cell trained" style="animation-delay:448ms" data-t="V4 run07 &middot; cycle 6|loss-function-modification|trained|0.5995"></i>
-<i class="cell blocked" style="animation-delay:451ms" data-t="V4 run07 &middot; cycle 7|adaptive-user-weight|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:454ms" data-t="V4 run07 &middot; cycle 8|recency-feature-transformation|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:458ms" data-t="V4 run07 &middot; cycle 9|novelty-feature|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:461ms" data-t="V4 run07 &middot; cycle 10|distribution-matching|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:464ms" data-t="V4 run07 &middot; cycle 11|per-user-normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:467ms" data-t="V4 run07 &middot; cycle 12|novelty-feature|blocked|—"></i>
-<i class="cell crash" style="animation-delay:470ms" data-t="V4 run07 &middot; cycle 13|meta-learned-adaptation|crash|—"></i>
-<i class="cell trained" style="animation-delay:474ms" data-t="V4 run07 &middot; cycle 14|sample-reweighting|trained|0.5582"></i>
-<i class="cell kept" style="animation-delay:477ms" data-t="V4 run07 &middot; cycle 15|temporal-patterns|kept|0.6028"></i>
-<i class="cell crash" style="animation-delay:480ms" data-t="V4 run07 &middot; cycle 16|semi-supervised-embeddings|crash|—"></i>
-<i class="cell blocked" style="animation-delay:483ms" data-t="V4 run07 &middot; cycle 17|dynamic-truncation-augmentation|blocked|—"></i>
-<i class="cell trained" style="animation-delay:486ms" data-t="V4 run07 &middot; cycle 18|focal-loss|trained|0.6022"></i>
-<i class="cell trained" style="animation-delay:490ms" data-t="V4 run07 &middot; cycle 19|focal-loss|trained|0.6019"></i>
-<i class="cell trained" style="animation-delay:493ms" data-t="V4 run07 &middot; cycle 20|focal-loss|trained|0.6002"></i>
+<i class="cell blocked" style="animation-delay:474ms" data-t="V4 run07 &middot; cycle 1|hybrid-cold-start|blocked|—"></i>
+<i class="cell skipped" style="animation-delay:477ms" data-t="V4 run07 &middot; cycle 2|—|skipped|—"></i>
+<i class="cell skipped" style="animation-delay:480ms" data-t="V4 run07 &middot; cycle 3|—|skipped|—"></i>
+<i class="cell trained" style="animation-delay:483ms" data-t="V4 run07 &middot; cycle 4|loss-function-modification|trained|0.5995"></i>
+<i class="cell trained" style="animation-delay:486ms" data-t="V4 run07 &middot; cycle 5|loss-function-modification|trained|0.5995"></i>
+<i class="cell trained" style="animation-delay:490ms" data-t="V4 run07 &middot; cycle 6|loss-function-modification|trained|0.5995"></i>
+<i class="cell blocked" style="animation-delay:493ms" data-t="V4 run07 &middot; cycle 7|adaptive-user-weight|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:496ms" data-t="V4 run07 &middot; cycle 8|recency-feature-transformation|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:499ms" data-t="V4 run07 &middot; cycle 9|novelty-feature|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:502ms" data-t="V4 run07 &middot; cycle 10|distribution-matching|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:506ms" data-t="V4 run07 &middot; cycle 11|per-user-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:509ms" data-t="V4 run07 &middot; cycle 12|novelty-feature|blocked|—"></i>
+<i class="cell crash" style="animation-delay:512ms" data-t="V4 run07 &middot; cycle 13|meta-learned-adaptation|crash|—"></i>
+<i class="cell trained" style="animation-delay:515ms" data-t="V4 run07 &middot; cycle 14|sample-reweighting|trained|0.5582"></i>
+<i class="cell kept" style="animation-delay:518ms" data-t="V4 run07 &middot; cycle 15|temporal-patterns|kept|0.6028"></i>
+<i class="cell crash" style="animation-delay:522ms" data-t="V4 run07 &middot; cycle 16|semi-supervised-embeddings|crash|—"></i>
+<i class="cell blocked" style="animation-delay:525ms" data-t="V4 run07 &middot; cycle 17|dynamic-truncation-augmentation|blocked|—"></i>
+<i class="cell trained" style="animation-delay:528ms" data-t="V4 run07 &middot; cycle 18|focal-loss|trained|0.6022"></i>
+<i class="cell trained" style="animation-delay:531ms" data-t="V4 run07 &middot; cycle 19|focal-loss|trained|0.6019"></i>
+<i class="cell trained" style="animation-delay:534ms" data-t="V4 run07 &middot; cycle 20|focal-loss|trained|0.6002"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V5</b> v5</div><div class="cells">
-<i class="cell blocked" style="animation-delay:496ms" data-t="V5 v5 &middot; cycle 1|position-embedding|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:499ms" data-t="V5 v5 &middot; cycle 2|multiscale-attention|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:502ms" data-t="V5 v5 &middot; cycle 3|instance-re-weighting|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:506ms" data-t="V5 v5 &middot; cycle 4|domain-adversarial-training|blocked|—"></i>
-<i class="cell crash" style="animation-delay:509ms" data-t="V5 v5 &middot; cycle 5|pairwise-learning-to-rank|crash|—"></i>
-<i class="cell crash" style="animation-delay:512ms" data-t="V5 v5 &middot; cycle 6|contrastive-divergence-optimization|crash|—"></i>
-<i class="cell crash" style="animation-delay:515ms" data-t="V5 v5 &middot; cycle 7|attention-inv-freq-weighting|crash|—"></i>
-<i class="cell blocked" style="animation-delay:518ms" data-t="V5 v5 &middot; cycle 8|temporal-pattern-attention|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:522ms" data-t="V5 v5 &middot; cycle 9|synthetic-sampling|blocked|—"></i>
-<i class="cell trained" style="animation-delay:525ms" data-t="V5 v5 &middot; cycle 10|session-pattern-capture|trained|0.6001"></i>
-<i class="cell crash" style="animation-delay:528ms" data-t="V5 v5 &middot; cycle 11|session-pattern-capture|crash|—"></i>
-<i class="cell blocked" style="animation-delay:531ms" data-t="V5 v5 &middot; cycle 12|transformer-for-sequences|blocked|—"></i>
-<i class="cell skipped" style="animation-delay:534ms" data-t="V5 v5 &middot; cycle 13|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:538ms" data-t="V5 v5 &middot; cycle 14|dynamic-embedding|blocked|—"></i>
-<i class="cell trained" style="animation-delay:541ms" data-t="V5 v5 &middot; cycle 15|positional-encoding|trained|0.5995"></i>
-<i class="cell trained" style="animation-delay:544ms" data-t="V5 v5 &middot; cycle 16|positional-encoding|trained|0.5976"></i>
-<i class="cell trained" style="animation-delay:547ms" data-t="V5 v5 &middot; cycle 17|positional-encoding|trained|0.5988"></i>
-<i class="cell blocked" style="animation-delay:550ms" data-t="V5 v5 &middot; cycle 18|feature-normalization|blocked|—"></i>
-<i class="cell trained" style="animation-delay:554ms" data-t="V5 v5 &middot; cycle 19|diversity-promoting-regularization|trained|0.4892"></i>
-<i class="cell skipped" style="animation-delay:557ms" data-t="V5 v5 &middot; cycle 20|—|skipped|—"></i>
-<i class="cell skipped" style="animation-delay:560ms" data-t="V5 v5 &middot; cycle 21|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:563ms" data-t="V5 v5 &middot; cycle 22|reinforcement-learning-dynamic-adjustm|blocked|—"></i>
-<i class="cell trained" style="animation-delay:566ms" data-t="V5 v5 &middot; cycle 23|recency-encoding|trained|0.6021"></i>
-<i class="cell skipped" style="animation-delay:570ms" data-t="V5 v5 &middot; cycle 24|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:573ms" data-t="V5 v5 &middot; cycle 25|user-specific-normalization|blocked|—"></i>
-<i class="cell crash" style="animation-delay:576ms" data-t="V5 v5 &middot; cycle 26|exponential-feedback-weighting|crash|—"></i>
-<i class="cell trained" style="animation-delay:579ms" data-t="V5 v5 &middot; cycle 27|re-weighting-dynamic-feedback|trained|0.6008"></i>
-<i class="cell trained" style="animation-delay:582ms" data-t="V5 v5 &middot; cycle 28|re-weighting-dynamic-feedback|trained|0.5959"></i>
-<i class="cell trained" style="animation-delay:586ms" data-t="V5 v5 &middot; cycle 29|re-weighting-dynamic-feedback|trained|0.5973"></i>
-<i class="cell crash" style="animation-delay:589ms" data-t="V5 v5 &middot; cycle 30|attribute-to-feature|crash|—"></i>
+<i class="cell blocked" style="animation-delay:538ms" data-t="V5 v5 &middot; cycle 1|position-embedding|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:541ms" data-t="V5 v5 &middot; cycle 2|multiscale-attention|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:544ms" data-t="V5 v5 &middot; cycle 3|instance-re-weighting|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:547ms" data-t="V5 v5 &middot; cycle 4|domain-adversarial-training|blocked|—"></i>
+<i class="cell crash" style="animation-delay:550ms" data-t="V5 v5 &middot; cycle 5|pairwise-learning-to-rank|crash|—"></i>
+<i class="cell crash" style="animation-delay:554ms" data-t="V5 v5 &middot; cycle 6|contrastive-divergence-optimization|crash|—"></i>
+<i class="cell crash" style="animation-delay:557ms" data-t="V5 v5 &middot; cycle 7|attention-inv-freq-weighting|crash|—"></i>
+<i class="cell blocked" style="animation-delay:560ms" data-t="V5 v5 &middot; cycle 8|temporal-pattern-attention|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:563ms" data-t="V5 v5 &middot; cycle 9|synthetic-sampling|blocked|—"></i>
+<i class="cell trained" style="animation-delay:566ms" data-t="V5 v5 &middot; cycle 10|session-pattern-capture|trained|0.6001"></i>
+<i class="cell crash" style="animation-delay:570ms" data-t="V5 v5 &middot; cycle 11|session-pattern-capture|crash|—"></i>
+<i class="cell blocked" style="animation-delay:573ms" data-t="V5 v5 &middot; cycle 12|transformer-for-sequences|blocked|—"></i>
+<i class="cell skipped" style="animation-delay:576ms" data-t="V5 v5 &middot; cycle 13|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:579ms" data-t="V5 v5 &middot; cycle 14|dynamic-embedding|blocked|—"></i>
+<i class="cell trained" style="animation-delay:582ms" data-t="V5 v5 &middot; cycle 15|positional-encoding|trained|0.5995"></i>
+<i class="cell trained" style="animation-delay:586ms" data-t="V5 v5 &middot; cycle 16|positional-encoding|trained|0.5976"></i>
+<i class="cell trained" style="animation-delay:589ms" data-t="V5 v5 &middot; cycle 17|positional-encoding|trained|0.5988"></i>
+<i class="cell blocked" style="animation-delay:592ms" data-t="V5 v5 &middot; cycle 18|feature-normalization|blocked|—"></i>
+<i class="cell trained" style="animation-delay:595ms" data-t="V5 v5 &middot; cycle 19|diversity-promoting-regularization|trained|0.4892"></i>
+<i class="cell skipped" style="animation-delay:598ms" data-t="V5 v5 &middot; cycle 20|—|skipped|—"></i>
+<i class="cell skipped" style="animation-delay:602ms" data-t="V5 v5 &middot; cycle 21|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:605ms" data-t="V5 v5 &middot; cycle 22|reinforcement-learning-dynamic-adjustm|blocked|—"></i>
+<i class="cell trained" style="animation-delay:608ms" data-t="V5 v5 &middot; cycle 23|recency-encoding|trained|0.6021"></i>
+<i class="cell skipped" style="animation-delay:611ms" data-t="V5 v5 &middot; cycle 24|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:614ms" data-t="V5 v5 &middot; cycle 25|user-specific-normalization|blocked|—"></i>
+<i class="cell crash" style="animation-delay:618ms" data-t="V5 v5 &middot; cycle 26|exponential-feedback-weighting|crash|—"></i>
+<i class="cell trained" style="animation-delay:621ms" data-t="V5 v5 &middot; cycle 27|re-weighting-dynamic-feedback|trained|0.6008"></i>
+<i class="cell trained" style="animation-delay:624ms" data-t="V5 v5 &middot; cycle 28|re-weighting-dynamic-feedback|trained|0.5959"></i>
+<i class="cell trained" style="animation-delay:627ms" data-t="V5 v5 &middot; cycle 29|re-weighting-dynamic-feedback|trained|0.5973"></i>
+<i class="cell crash" style="animation-delay:630ms" data-t="V5 v5 &middot; cycle 30|attribute-to-feature|crash|—"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V5</b> v5_exploit</div><div class="cells">
-<i class="cell exploit" style="animation-delay:592ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.5937"></i>
-<i class="cell exploit" style="animation-delay:595ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.6018"></i>
-<i class="cell exploit" style="animation-delay:598ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.6018"></i>
-<i class="cell exploit" style="animation-delay:602ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.5998"></i>
-<i class="cell kept" style="animation-delay:605ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|kept|0.6014"></i>
-<i class="cell skipped" style="animation-delay:608ms" data-t="V5 v5_exploit &middot; cycle 2|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:611ms" data-t="V5 v5_exploit &middot; cycle 3|temporal-features-integration|blocked|—"></i>
+<i class="cell exploit" style="animation-delay:634ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.5937"></i>
+<i class="cell exploit" style="animation-delay:637ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.6018"></i>
+<i class="cell exploit" style="animation-delay:640ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.6018"></i>
+<i class="cell exploit" style="animation-delay:643ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|exploit|0.5998"></i>
+<i class="cell kept" style="animation-delay:646ms" data-t="V5 v5_exploit &middot; cycle 1|user-cluster-features|kept|0.6014"></i>
+<i class="cell skipped" style="animation-delay:650ms" data-t="V5 v5_exploit &middot; cycle 2|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:653ms" data-t="V5 v5_exploit &middot; cycle 3|temporal-features-integration|blocked|—"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V5</b> v5_exploit2</div><div class="cells">
-<i class="cell blocked" style="animation-delay:614ms" data-t="V5 v5_exploit2 &middot; cycle 1|negative-sampling-alignment|blocked|—"></i>
-<i class="cell trained" style="animation-delay:618ms" data-t="V5 v5_exploit2 &middot; cycle 2|contrastive-learning|trained|0.4926"></i>
-<i class="cell skipped" style="animation-delay:621ms" data-t="V5 v5_exploit2 &middot; cycle 3|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:624ms" data-t="V5 v5_exploit2 &middot; cycle 4|adversarial-training|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:627ms" data-t="V5 v5_exploit2 &middot; cycle 5|temporal-dynamic-embeddings|blocked|—"></i>
-<i class="cell trained" style="animation-delay:630ms" data-t="V5 v5_exploit2 &middot; cycle 6|embedding-dropout|trained|0.5945"></i>
-<i class="cell trained" style="animation-delay:634ms" data-t="V5 v5_exploit2 &middot; cycle 7|embedding-dropout|trained|0.5918"></i>
-<i class="cell trained" style="animation-delay:637ms" data-t="V5 v5_exploit2 &middot; cycle 8|embedding-dropout|trained|0.5936"></i>
+<i class="cell blocked" style="animation-delay:656ms" data-t="V5 v5_exploit2 &middot; cycle 1|negative-sampling-alignment|blocked|—"></i>
+<i class="cell trained" style="animation-delay:659ms" data-t="V5 v5_exploit2 &middot; cycle 2|contrastive-learning|trained|0.4926"></i>
+<i class="cell skipped" style="animation-delay:662ms" data-t="V5 v5_exploit2 &middot; cycle 3|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:666ms" data-t="V5 v5_exploit2 &middot; cycle 4|adversarial-training|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:669ms" data-t="V5 v5_exploit2 &middot; cycle 5|temporal-dynamic-embeddings|blocked|—"></i>
+<i class="cell trained" style="animation-delay:672ms" data-t="V5 v5_exploit2 &middot; cycle 6|embedding-dropout|trained|0.5945"></i>
+<i class="cell trained" style="animation-delay:675ms" data-t="V5 v5_exploit2 &middot; cycle 7|embedding-dropout|trained|0.5918"></i>
+<i class="cell trained" style="animation-delay:678ms" data-t="V5 v5_exploit2 &middot; cycle 8|embedding-dropout|trained|0.5936"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V6</b> v6</div><div class="cells">
-<i class="cell trained" style="animation-delay:640ms" data-t="V6 v6 &middot; cycle 1|weighted-loss-emphasis|trained|0.5935"></i>
-<i class="cell trained" style="animation-delay:643ms" data-t="V6 v6 &middot; cycle 2|weighted-loss-emphasis|trained|0.5566"></i>
-<i class="cell blocked" style="animation-delay:646ms" data-t="V6 v6 &middot; cycle 3|eval-length-groups|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:650ms" data-t="V6 v6 &middot; cycle 4|length-quantile-subbatching|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:653ms" data-t="V6 v6 &middot; cycle 5|user-domain-adaptation|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:656ms" data-t="V6 v6 &middot; cycle 6|stratified-sampling|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:659ms" data-t="V6 v6 &middot; cycle 7|list-length-feature|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:662ms" data-t="V6 v6 &middot; cycle 8|list-length-normalization|blocked|—"></i>
-<i class="cell crash" style="animation-delay:666ms" data-t="V6 v6 &middot; cycle 9|weighted-loss-emphasis|crash|—"></i>
-<i class="cell exploit" style="animation-delay:669ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.5959"></i>
-<i class="cell exploit" style="animation-delay:672ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6015"></i>
-<i class="cell exploit" style="animation-delay:675ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6035"></i>
-<i class="cell exploit" style="animation-delay:678ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6003"></i>
-<i class="cell kept" style="animation-delay:682ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|kept|0.6031"></i>
-<i class="cell trained" style="animation-delay:685ms" data-t="V6 v6 &middot; cycle 11|user-variance-feature|trained|0.6031"></i>
-<i class="cell trained" style="animation-delay:688ms" data-t="V6 v6 &middot; cycle 12|user-variance-feature|trained|0.6004"></i>
+<i class="cell trained" style="animation-delay:682ms" data-t="V6 v6 &middot; cycle 1|weighted-loss-emphasis|trained|0.5935"></i>
+<i class="cell trained" style="animation-delay:685ms" data-t="V6 v6 &middot; cycle 2|weighted-loss-emphasis|trained|0.5566"></i>
+<i class="cell blocked" style="animation-delay:688ms" data-t="V6 v6 &middot; cycle 3|eval-length-groups|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:691ms" data-t="V6 v6 &middot; cycle 4|length-quantile-subbatching|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:694ms" data-t="V6 v6 &middot; cycle 5|user-domain-adaptation|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:698ms" data-t="V6 v6 &middot; cycle 6|stratified-sampling|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:701ms" data-t="V6 v6 &middot; cycle 7|list-length-feature|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:704ms" data-t="V6 v6 &middot; cycle 8|list-length-normalization|blocked|—"></i>
+<i class="cell crash" style="animation-delay:707ms" data-t="V6 v6 &middot; cycle 9|weighted-loss-emphasis|crash|—"></i>
+<i class="cell exploit" style="animation-delay:710ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.5959"></i>
+<i class="cell exploit" style="animation-delay:714ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6015"></i>
+<i class="cell exploit" style="animation-delay:717ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6035"></i>
+<i class="cell exploit" style="animation-delay:720ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|exploit|0.6003"></i>
+<i class="cell kept" style="animation-delay:723ms" data-t="V6 v6 &middot; cycle 10|class-weighted-loss|kept|0.6031"></i>
+<i class="cell trained" style="animation-delay:726ms" data-t="V6 v6 &middot; cycle 11|user-variance-feature|trained|0.6031"></i>
+<i class="cell trained" style="animation-delay:730ms" data-t="V6 v6 &middot; cycle 12|user-variance-feature|trained|0.6004"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V6</b> v6b</div><div class="cells">
-<i class="cell blocked" style="animation-delay:691ms" data-t="V6 v6b &middot; cycle 1|fixed-length-representation|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:694ms" data-t="V6 v6b &middot; cycle 2|eval-length-groups|blocked|—"></i>
-<i class="cell trained" style="animation-delay:698ms" data-t="V6 v6b &middot; cycle 3|focal-loss|trained|0.6016"></i>
-<i class="cell trained" style="animation-delay:701ms" data-t="V6 v6b &middot; cycle 4|importance-weighting-user-list|trained|0.5859"></i>
-<i class="cell blocked" style="animation-delay:704ms" data-t="V6 v6b &middot; cycle 5|length-as-feature|blocked|—"></i>
-<i class="cell skipped" style="animation-delay:707ms" data-t="V6 v6b &middot; cycle 6|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:710ms" data-t="V6 v6b &middot; cycle 7|length-adjusted-subsampling|blocked|—"></i>
-<i class="cell trained" style="animation-delay:714ms" data-t="V6 v6b &middot; cycle 8|relative-rank-position|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:717ms" data-t="V6 v6b &middot; cycle 9|relative-rank-position|trained|0.5987"></i>
-<i class="cell trained" style="animation-delay:720ms" data-t="V6 v6b &middot; cycle 10|relative-rank-position|trained|0.5977"></i>
-<i class="cell blocked" style="animation-delay:723ms" data-t="V6 v6b &middot; cycle 11|sample-weighting|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:726ms" data-t="V6 v6b &middot; cycle 12|list-length-feature|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:730ms" data-t="V6 v6b &middot; cycle 13|rebalance-training|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:733ms" data-t="V6 v6b &middot; cycle 14|normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:736ms" data-t="V6 v6b &middot; cycle 15|bias-weight-correction|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:739ms" data-t="V6 v6b &middot; cycle 16|score-normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:742ms" data-t="V6 v6b &middot; cycle 17|distribution-matched-sampling|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:746ms" data-t="V6 v6b &middot; cycle 18|importance-features|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:749ms" data-t="V6 v6b &middot; cycle 19|list-position-feature|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:752ms" data-t="V6 v6b &middot; cycle 20|stratified-sampling|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:755ms" data-t="V6 v6b &middot; cycle 21|list-length-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:733ms" data-t="V6 v6b &middot; cycle 1|fixed-length-representation|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:736ms" data-t="V6 v6b &middot; cycle 2|eval-length-groups|blocked|—"></i>
+<i class="cell trained" style="animation-delay:739ms" data-t="V6 v6b &middot; cycle 3|focal-loss|trained|0.6016"></i>
+<i class="cell trained" style="animation-delay:742ms" data-t="V6 v6b &middot; cycle 4|importance-weighting-user-list|trained|0.5859"></i>
+<i class="cell blocked" style="animation-delay:746ms" data-t="V6 v6b &middot; cycle 5|length-as-feature|blocked|—"></i>
+<i class="cell skipped" style="animation-delay:749ms" data-t="V6 v6b &middot; cycle 6|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:752ms" data-t="V6 v6b &middot; cycle 7|length-adjusted-subsampling|blocked|—"></i>
+<i class="cell trained" style="animation-delay:755ms" data-t="V6 v6b &middot; cycle 8|relative-rank-position|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:758ms" data-t="V6 v6b &middot; cycle 9|relative-rank-position|trained|0.5987"></i>
+<i class="cell trained" style="animation-delay:762ms" data-t="V6 v6b &middot; cycle 10|relative-rank-position|trained|0.5977"></i>
+<i class="cell blocked" style="animation-delay:765ms" data-t="V6 v6b &middot; cycle 11|sample-weighting|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:768ms" data-t="V6 v6b &middot; cycle 12|list-length-feature|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:771ms" data-t="V6 v6b &middot; cycle 13|rebalance-training|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:774ms" data-t="V6 v6b &middot; cycle 14|normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:778ms" data-t="V6 v6b &middot; cycle 15|bias-weight-correction|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:781ms" data-t="V6 v6b &middot; cycle 16|score-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:784ms" data-t="V6 v6b &middot; cycle 17|distribution-matched-sampling|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:787ms" data-t="V6 v6b &middot; cycle 18|importance-features|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:790ms" data-t="V6 v6b &middot; cycle 19|list-position-feature|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:794ms" data-t="V6 v6b &middot; cycle 20|stratified-sampling|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:797ms" data-t="V6 v6b &middot; cycle 21|list-length-normalization|blocked|—"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V6</b> v6c</div><div class="cells">
-<i class="cell blocked" style="animation-delay:758ms" data-t="V6 v6c &middot; cycle 1|list-length-normalization|blocked|—"></i>
-<i class="cell trained" style="animation-delay:762ms" data-t="V6 v6c &middot; cycle 2|day-of-interaction-feature|trained|0.6016"></i>
-<i class="cell trained" style="animation-delay:765ms" data-t="V6 v6c &middot; cycle 3|class-weighting|trained|0.5962"></i>
-<i class="cell trained" style="animation-delay:768ms" data-t="V6 v6c &middot; cycle 4|class-weighting|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:771ms" data-t="V6 v6c &middot; cycle 5|class-weighting|trained|0.5992"></i>
-<i class="cell trained" style="animation-delay:774ms" data-t="V6 v6c &middot; cycle 6|focal-loss-for-homogeneous-balance|trained|0.5997"></i>
-<i class="cell trained" style="animation-delay:778ms" data-t="V6 v6c &middot; cycle 7|focal-loss-for-homogeneous-balance|trained|0.5998"></i>
-<i class="cell trained" style="animation-delay:781ms" data-t="V6 v6c &middot; cycle 8|focal-loss-for-homogeneous-balance|trained|0.5998"></i>
-<i class="cell crash" style="animation-delay:784ms" data-t="V6 v6c &middot; cycle 9|user-behavior-clustering|crash|—"></i>
-<i class="cell crash" style="animation-delay:787ms" data-t="V6 v6c &middot; cycle 10|user-engagement-variance|crash|—"></i>
-<i class="cell trained" style="animation-delay:790ms" data-t="V6 v6c &middot; cycle 11|sample-weighting|trained|0.6018"></i>
-<i class="cell crash" style="animation-delay:794ms" data-t="V6 v6c &middot; cycle 12|user-activity-entropy|crash|—"></i>
-<i class="cell trained" style="animation-delay:797ms" data-t="V6 v6c &middot; cycle 13|oversample-underrepresented|trained|0.5413"></i>
-<i class="cell trained" style="animation-delay:800ms" data-t="V6 v6c &middot; cycle 14|loss-weighting-for-unseen-users|trained|0.6015"></i>
-<i class="cell exploit" style="animation-delay:803ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6016"></i>
-<i class="cell exploit" style="animation-delay:806ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6019"></i>
-<i class="cell exploit" style="animation-delay:810ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6022"></i>
-<i class="cell exploit" style="animation-delay:813ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6028"></i>
-<i class="cell kept" style="animation-delay:816ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|kept|0.6022"></i>
-<i class="cell crash" style="animation-delay:819ms" data-t="V6 v6c &middot; cycle 16|user-engagement-deviation|crash|—"></i>
-<i class="cell blocked" style="animation-delay:822ms" data-t="V6 v6c &middot; cycle 17|time-decay-factor|blocked|—"></i>
-<i class="cell crash" style="animation-delay:826ms" data-t="V6 v6c &middot; cycle 18|reweight-resample|crash|—"></i>
+<i class="cell blocked" style="animation-delay:800ms" data-t="V6 v6c &middot; cycle 1|list-length-normalization|blocked|—"></i>
+<i class="cell trained" style="animation-delay:803ms" data-t="V6 v6c &middot; cycle 2|day-of-interaction-feature|trained|0.6016"></i>
+<i class="cell trained" style="animation-delay:806ms" data-t="V6 v6c &middot; cycle 3|class-weighting|trained|0.5962"></i>
+<i class="cell trained" style="animation-delay:810ms" data-t="V6 v6c &middot; cycle 4|class-weighting|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:813ms" data-t="V6 v6c &middot; cycle 5|class-weighting|trained|0.5992"></i>
+<i class="cell trained" style="animation-delay:816ms" data-t="V6 v6c &middot; cycle 6|focal-loss-for-homogeneous-balance|trained|0.5997"></i>
+<i class="cell trained" style="animation-delay:819ms" data-t="V6 v6c &middot; cycle 7|focal-loss-for-homogeneous-balance|trained|0.5998"></i>
+<i class="cell trained" style="animation-delay:822ms" data-t="V6 v6c &middot; cycle 8|focal-loss-for-homogeneous-balance|trained|0.5998"></i>
+<i class="cell crash" style="animation-delay:826ms" data-t="V6 v6c &middot; cycle 9|user-behavior-clustering|crash|—"></i>
+<i class="cell crash" style="animation-delay:829ms" data-t="V6 v6c &middot; cycle 10|user-engagement-variance|crash|—"></i>
+<i class="cell trained" style="animation-delay:832ms" data-t="V6 v6c &middot; cycle 11|sample-weighting|trained|0.6018"></i>
+<i class="cell crash" style="animation-delay:835ms" data-t="V6 v6c &middot; cycle 12|user-activity-entropy|crash|—"></i>
+<i class="cell trained" style="animation-delay:838ms" data-t="V6 v6c &middot; cycle 13|oversample-underrepresented|trained|0.5413"></i>
+<i class="cell trained" style="animation-delay:842ms" data-t="V6 v6c &middot; cycle 14|loss-weighting-for-unseen-users|trained|0.6015"></i>
+<i class="cell exploit" style="animation-delay:845ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6016"></i>
+<i class="cell exploit" style="animation-delay:848ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6019"></i>
+<i class="cell exploit" style="animation-delay:851ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6022"></i>
+<i class="cell exploit" style="animation-delay:854ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|exploit|0.6028"></i>
+<i class="cell kept" style="animation-delay:858ms" data-t="V6 v6c &middot; cycle 15|temporal-activity-features|kept|0.6022"></i>
+<i class="cell crash" style="animation-delay:861ms" data-t="V6 v6c &middot; cycle 16|user-engagement-deviation|crash|—"></i>
+<i class="cell blocked" style="animation-delay:864ms" data-t="V6 v6c &middot; cycle 17|time-decay-factor|blocked|—"></i>
+<i class="cell crash" style="animation-delay:867ms" data-t="V6 v6c &middot; cycle 18|reweight-resample|crash|—"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V6</b> v6c_gpt55</div><div class="cells">
-<i class="cell blocked" style="animation-delay:829ms" data-t="V6 v6c_gpt55 &middot; cycle 1|length-scaled-features|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:832ms" data-t="V6 v6c_gpt55 &middot; cycle 2|temporal-decay|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:835ms" data-t="V6 v6c_gpt55 &middot; cycle 3|gradient-boosting-weight-adjustment|blocked|—"></i>
-<i class="cell exploit" style="animation-delay:838ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.5986"></i>
-<i class="cell exploit" style="animation-delay:842ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6027"></i>
-<i class="cell exploit" style="animation-delay:845ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6035"></i>
-<i class="cell exploit" style="animation-delay:848ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6027"></i>
-<i class="cell kept" style="animation-delay:851ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|kept|0.6030"></i>
-<i class="cell blocked" style="animation-delay:854ms" data-t="V6 v6c_gpt55 &middot; cycle 5|loss-balancing-term|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:858ms" data-t="V6 v6c_gpt55 &middot; cycle 6|focal-loss|blocked|—"></i>
-<i class="cell trained" style="animation-delay:861ms" data-t="V6 v6c_gpt55 &middot; cycle 7|temporal-recency-weighting|trained|0.6028"></i>
-<i class="cell trained" style="animation-delay:864ms" data-t="V6 v6c_gpt55 &middot; cycle 8|temporal-recency-weighting|trained|0.6012"></i>
-<i class="cell trained" style="animation-delay:867ms" data-t="V6 v6c_gpt55 &middot; cycle 9|temporal-recency-weighting|trained|0.6010"></i>
+<i class="cell blocked" style="animation-delay:870ms" data-t="V6 v6c_gpt55 &middot; cycle 1|length-scaled-features|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:874ms" data-t="V6 v6c_gpt55 &middot; cycle 2|temporal-decay|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:877ms" data-t="V6 v6c_gpt55 &middot; cycle 3|gradient-boosting-weight-adjustment|blocked|—"></i>
+<i class="cell exploit" style="animation-delay:880ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.5986"></i>
+<i class="cell exploit" style="animation-delay:883ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6027"></i>
+<i class="cell exploit" style="animation-delay:886ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6035"></i>
+<i class="cell exploit" style="animation-delay:890ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|exploit|0.6027"></i>
+<i class="cell kept" style="animation-delay:893ms" data-t="V6 v6c_gpt55 &middot; cycle 4|focal-loss-weighting|kept|0.6030"></i>
+<i class="cell blocked" style="animation-delay:896ms" data-t="V6 v6c_gpt55 &middot; cycle 5|loss-balancing-term|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:899ms" data-t="V6 v6c_gpt55 &middot; cycle 6|focal-loss|blocked|—"></i>
+<i class="cell trained" style="animation-delay:902ms" data-t="V6 v6c_gpt55 &middot; cycle 7|temporal-recency-weighting|trained|0.6028"></i>
+<i class="cell trained" style="animation-delay:906ms" data-t="V6 v6c_gpt55 &middot; cycle 8|temporal-recency-weighting|trained|0.6012"></i>
+<i class="cell trained" style="animation-delay:909ms" data-t="V6 v6c_gpt55 &middot; cycle 9|temporal-recency-weighting|trained|0.6010"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V6</b> v6c_verify</div><div class="cells">
-<i class="cell trained" style="animation-delay:870ms" data-t="V6 v6c_verify &middot; cycle 1|list-length-feature|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:874ms" data-t="V6 v6c_verify &middot; cycle 2|list-length-feature|trained|0.5991"></i>
-<i class="cell trained" style="animation-delay:877ms" data-t="V6 v6c_verify &middot; cycle 3|list-length-feature|trained|0.5988"></i>
-<i class="cell trained" style="animation-delay:880ms" data-t="V6 v6c_verify &middot; cycle 4|importance-sampling|trained|0.5859"></i>
-<i class="cell blocked" style="animation-delay:883ms" data-t="V6 v6c_verify &middot; cycle 5|sample-reweighting|blocked|—"></i>
-<i class="cell trained" style="animation-delay:886ms" data-t="V6 v6c_verify &middot; cycle 6|inverse-length-weighting|trained|0.6011"></i>
-<i class="cell trained" style="animation-delay:890ms" data-t="V6 v6c_verify &middot; cycle 7|inverse-length-weighting|trained|0.5945"></i>
-<i class="cell trained" style="animation-delay:893ms" data-t="V6 v6c_verify &middot; cycle 8|inverse-length-weighting|trained|0.5954"></i>
-<i class="cell blocked" style="animation-delay:896ms" data-t="V6 v6c_verify &middot; cycle 9|temporal-stratification|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:899ms" data-t="V6 v6c_verify &middot; cycle 10|dynamic-weighting-negative-users|blocked|—"></i>
-<i class="cell trained" style="animation-delay:902ms" data-t="V6 v6c_verify &middot; cycle 11|positional-embedding|trained|0.5979"></i>
-<i class="cell trained" style="animation-delay:906ms" data-t="V6 v6c_verify &middot; cycle 12|positional-embedding|trained|0.5956"></i>
-<i class="cell trained" style="animation-delay:909ms" data-t="V6 v6c_verify &middot; cycle 13|positional-embedding|trained|0.5931"></i>
-<i class="cell crash" style="animation-delay:912ms" data-t="V6 v6c_verify &middot; cycle 14|length-normalization|crash|—"></i>
-<i class="cell trained" style="animation-delay:915ms" data-t="V6 v6c_verify &middot; cycle 15|cost-sensitive-loss|trained|0.6015"></i>
-<i class="cell trained" style="animation-delay:918ms" data-t="V6 v6c_verify &middot; cycle 16|user-context-features|trained|0.6016"></i>
-<i class="cell crash" style="animation-delay:922ms" data-t="V6 v6c_verify &middot; cycle 17|data-augmentation-subsampling|crash|—"></i>
-<i class="cell trained" style="animation-delay:925ms" data-t="V6 v6c_verify &middot; cycle 18|list-length-weighted-loss|trained|0.6007"></i>
-<i class="cell trained" style="animation-delay:928ms" data-t="V6 v6c_verify &middot; cycle 19|list-length-weighted-loss|trained|0.5897"></i>
-<i class="cell crash" style="animation-delay:931ms" data-t="V6 v6c_verify &middot; cycle 20|adaptive-loss-scaling|crash|—"></i>
-<i class="cell skipped" style="animation-delay:934ms" data-t="V6 v6c_verify &middot; cycle 21|—|skipped|—"></i>
-<i class="cell blocked" style="animation-delay:938ms" data-t="V6 v6c_verify &middot; cycle 22|multi-task-learning|blocked|—"></i>
-<i class="cell trained" style="animation-delay:941ms" data-t="V6 v6c_verify &middot; cycle 23|list-length-normalization|trained|0.6011"></i>
-<i class="cell trained" style="animation-delay:944ms" data-t="V6 v6c_verify &middot; cycle 24|list-length-normalization|trained|0.5961"></i>
-<i class="cell trained" style="animation-delay:947ms" data-t="V6 v6c_verify &middot; cycle 25|list-length-normalization|trained|0.5954"></i>
+<i class="cell trained" style="animation-delay:912ms" data-t="V6 v6c_verify &middot; cycle 1|list-length-feature|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:915ms" data-t="V6 v6c_verify &middot; cycle 2|list-length-feature|trained|0.5991"></i>
+<i class="cell trained" style="animation-delay:918ms" data-t="V6 v6c_verify &middot; cycle 3|list-length-feature|trained|0.5988"></i>
+<i class="cell trained" style="animation-delay:922ms" data-t="V6 v6c_verify &middot; cycle 4|importance-sampling|trained|0.5859"></i>
+<i class="cell blocked" style="animation-delay:925ms" data-t="V6 v6c_verify &middot; cycle 5|sample-reweighting|blocked|—"></i>
+<i class="cell trained" style="animation-delay:928ms" data-t="V6 v6c_verify &middot; cycle 6|inverse-length-weighting|trained|0.6011"></i>
+<i class="cell trained" style="animation-delay:931ms" data-t="V6 v6c_verify &middot; cycle 7|inverse-length-weighting|trained|0.5945"></i>
+<i class="cell trained" style="animation-delay:934ms" data-t="V6 v6c_verify &middot; cycle 8|inverse-length-weighting|trained|0.5954"></i>
+<i class="cell blocked" style="animation-delay:938ms" data-t="V6 v6c_verify &middot; cycle 9|temporal-stratification|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:941ms" data-t="V6 v6c_verify &middot; cycle 10|dynamic-weighting-negative-users|blocked|—"></i>
+<i class="cell trained" style="animation-delay:944ms" data-t="V6 v6c_verify &middot; cycle 11|positional-embedding|trained|0.5979"></i>
+<i class="cell trained" style="animation-delay:947ms" data-t="V6 v6c_verify &middot; cycle 12|positional-embedding|trained|0.5956"></i>
+<i class="cell trained" style="animation-delay:950ms" data-t="V6 v6c_verify &middot; cycle 13|positional-embedding|trained|0.5931"></i>
+<i class="cell crash" style="animation-delay:954ms" data-t="V6 v6c_verify &middot; cycle 14|length-normalization|crash|—"></i>
+<i class="cell trained" style="animation-delay:957ms" data-t="V6 v6c_verify &middot; cycle 15|cost-sensitive-loss|trained|0.6015"></i>
+<i class="cell trained" style="animation-delay:960ms" data-t="V6 v6c_verify &middot; cycle 16|user-context-features|trained|0.6016"></i>
+<i class="cell crash" style="animation-delay:963ms" data-t="V6 v6c_verify &middot; cycle 17|data-augmentation-subsampling|crash|—"></i>
+<i class="cell trained" style="animation-delay:966ms" data-t="V6 v6c_verify &middot; cycle 18|list-length-weighted-loss|trained|0.6007"></i>
+<i class="cell trained" style="animation-delay:970ms" data-t="V6 v6c_verify &middot; cycle 19|list-length-weighted-loss|trained|0.5897"></i>
+<i class="cell crash" style="animation-delay:973ms" data-t="V6 v6c_verify &middot; cycle 20|adaptive-loss-scaling|crash|—"></i>
+<i class="cell skipped" style="animation-delay:976ms" data-t="V6 v6c_verify &middot; cycle 21|—|skipped|—"></i>
+<i class="cell blocked" style="animation-delay:979ms" data-t="V6 v6c_verify &middot; cycle 22|multi-task-learning|blocked|—"></i>
+<i class="cell trained" style="animation-delay:982ms" data-t="V6 v6c_verify &middot; cycle 23|list-length-normalization|trained|0.6011"></i>
+<i class="cell trained" style="animation-delay:986ms" data-t="V6 v6c_verify &middot; cycle 24|list-length-normalization|trained|0.5961"></i>
+<i class="cell trained" style="animation-delay:989ms" data-t="V6 v6c_verify &middot; cycle 25|list-length-normalization|trained|0.5954"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V7</b> v7</div><div class="cells">
-<i class="cell trained" style="animation-delay:950ms" data-t="V7 v7 &middot; cycle 1|dynamic-short-list-weighting|trained|0.5939"></i>
-<i class="cell trained" style="animation-delay:954ms" data-t="V7 v7 &middot; cycle 2|dynamic-short-list-weighting|trained|0.5572"></i>
-<i class="cell trained" style="animation-delay:957ms" data-t="V7 v7 &middot; cycle 3|domain-adaptation|trained|0.6014"></i>
-<i class="cell crash" style="animation-delay:960ms" data-t="V7 v7 &middot; cycle 4|loss-weighting|crash|—"></i>
-<i class="cell trained" style="animation-delay:963ms" data-t="V7 v7 &middot; cycle 5|importance-weighting|trained|0.5557"></i>
-<i class="cell trained" style="animation-delay:966ms" data-t="V7 v7 &middot; cycle 6|time-aware-user-trend|trained|0.6008"></i>
-<i class="cell trained" style="animation-delay:970ms" data-t="V7 v7 &middot; cycle 7|time-aware-user-trend|trained|0.5992"></i>
-<i class="cell trained" style="animation-delay:973ms" data-t="V7 v7 &middot; cycle 8|time-aware-user-trend|trained|0.5992"></i>
-<i class="cell trained" style="animation-delay:976ms" data-t="V7 v7 &middot; cycle 9|explicit-length-feature|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:979ms" data-t="V7 v7 &middot; cycle 10|explicit-length-feature|trained|0.5983"></i>
-<i class="cell trained" style="animation-delay:982ms" data-t="V7 v7 &middot; cycle 11|explicit-length-feature|trained|0.5988"></i>
-<i class="cell blocked" style="animation-delay:986ms" data-t="V7 v7 &middot; cycle 12|position-embeddings|blocked|—"></i>
-<i class="cell trained" style="animation-delay:989ms" data-t="V7 v7 &middot; cycle 13|explicit-list-length-encoding|trained|0.5997"></i>
-<i class="cell trained" style="animation-delay:992ms" data-t="V7 v7 &middot; cycle 14|explicit-list-length-encoding|trained|0.5988"></i>
-<i class="cell crash" style="animation-delay:995ms" data-t="V7 v7 &middot; cycle 15|explicit-list-length-encoding|crash|—"></i>
-<i class="cell trained" style="animation-delay:998ms" data-t="V7 v7 &middot; cycle 16|focal-loss|trained|0.6016"></i>
-<i class="cell blocked" style="animation-delay:1002ms" data-t="V7 v7 &middot; cycle 17|focal-loss|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1005ms" data-t="V7 v7 &middot; cycle 18|class-reweighting|blocked|—"></i>
-<i class="cell timeout" style="animation-delay:1008ms" data-t="V7 v7 &middot; cycle 19|loss-reweighting-based-on-list-length|timeout|—"></i>
-<i class="cell trained" style="animation-delay:1011ms" data-t="V7 v7 &middot; cycle 20|Cost-Sensitive Learning|trained|0.5972"></i>
-<i class="cell trained" style="animation-delay:1014ms" data-t="V7 v7 &middot; cycle 21|Cost-Sensitive Learning|trained|0.5980"></i>
-<i class="cell trained" style="animation-delay:1018ms" data-t="V7 v7 &middot; cycle 22|Cost-Sensitive Learning|trained|0.6005"></i>
-<i class="cell trained" style="animation-delay:1021ms" data-t="V7 v7 &middot; cycle 23|time-based-features|trained|0.5986"></i>
+<i class="cell trained" style="animation-delay:992ms" data-t="V7 v7 &middot; cycle 1|dynamic-short-list-weighting|trained|0.5939"></i>
+<i class="cell trained" style="animation-delay:995ms" data-t="V7 v7 &middot; cycle 2|dynamic-short-list-weighting|trained|0.5572"></i>
+<i class="cell trained" style="animation-delay:998ms" data-t="V7 v7 &middot; cycle 3|domain-adaptation|trained|0.6014"></i>
+<i class="cell crash" style="animation-delay:1002ms" data-t="V7 v7 &middot; cycle 4|loss-weighting|crash|—"></i>
+<i class="cell trained" style="animation-delay:1005ms" data-t="V7 v7 &middot; cycle 5|importance-weighting|trained|0.5557"></i>
+<i class="cell trained" style="animation-delay:1008ms" data-t="V7 v7 &middot; cycle 6|time-aware-user-trend|trained|0.6008"></i>
+<i class="cell trained" style="animation-delay:1011ms" data-t="V7 v7 &middot; cycle 7|time-aware-user-trend|trained|0.5992"></i>
+<i class="cell trained" style="animation-delay:1014ms" data-t="V7 v7 &middot; cycle 8|time-aware-user-trend|trained|0.5992"></i>
+<i class="cell trained" style="animation-delay:1018ms" data-t="V7 v7 &middot; cycle 9|explicit-length-feature|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:1021ms" data-t="V7 v7 &middot; cycle 10|explicit-length-feature|trained|0.5983"></i>
+<i class="cell trained" style="animation-delay:1024ms" data-t="V7 v7 &middot; cycle 11|explicit-length-feature|trained|0.5988"></i>
+<i class="cell blocked" style="animation-delay:1027ms" data-t="V7 v7 &middot; cycle 12|position-embeddings|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1030ms" data-t="V7 v7 &middot; cycle 13|explicit-list-length-encoding|trained|0.5997"></i>
+<i class="cell trained" style="animation-delay:1034ms" data-t="V7 v7 &middot; cycle 14|explicit-list-length-encoding|trained|0.5988"></i>
+<i class="cell crash" style="animation-delay:1037ms" data-t="V7 v7 &middot; cycle 15|explicit-list-length-encoding|crash|—"></i>
+<i class="cell trained" style="animation-delay:1040ms" data-t="V7 v7 &middot; cycle 16|focal-loss|trained|0.6016"></i>
+<i class="cell blocked" style="animation-delay:1043ms" data-t="V7 v7 &middot; cycle 17|focal-loss|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1046ms" data-t="V7 v7 &middot; cycle 18|class-reweighting|blocked|—"></i>
+<i class="cell timeout" style="animation-delay:1050ms" data-t="V7 v7 &middot; cycle 19|loss-reweighting-based-on-list-length|timeout|—"></i>
+<i class="cell trained" style="animation-delay:1053ms" data-t="V7 v7 &middot; cycle 20|Cost-Sensitive Learning|trained|0.5972"></i>
+<i class="cell trained" style="animation-delay:1056ms" data-t="V7 v7 &middot; cycle 21|Cost-Sensitive Learning|trained|0.5980"></i>
+<i class="cell trained" style="animation-delay:1059ms" data-t="V7 v7 &middot; cycle 22|Cost-Sensitive Learning|trained|0.6005"></i>
+<i class="cell trained" style="animation-delay:1062ms" data-t="V7 v7 &middot; cycle 23|time-based-features|trained|0.5986"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V7</b> v7b</div><div class="cells">
-<i class="cell trained" style="animation-delay:1024ms" data-t="V7 v7b &middot; cycle 1|eval-length-feature|trained|0.5958"></i>
-<i class="cell trained" style="animation-delay:1027ms" data-t="V7 v7b &middot; cycle 2|eval-length-feature|trained|0.5926"></i>
-<i class="cell trained" style="animation-delay:1030ms" data-t="V7 v7b &middot; cycle 3|eval-length-feature|trained|0.5932"></i>
-<i class="cell skipped" style="animation-delay:1034ms" data-t="V7 v7b &middot; cycle 4|—|skipped|—"></i>
-<i class="cell trained" style="animation-delay:1037ms" data-t="V7 v7b &middot; cycle 5|sampling-shorter-lists|trained|0.6015"></i>
-<i class="cell trained" style="animation-delay:1040ms" data-t="V7 v7b &middot; cycle 6|weighted-loss-balance|trained|0.5997"></i>
-<i class="cell trained" style="animation-delay:1043ms" data-t="V7 v7b &middot; cycle 7|weighted-loss-balance|trained|0.5859"></i>
-<i class="cell blocked" style="animation-delay:1046ms" data-t="V7 v7b &middot; cycle 8|domain-adaptation-weighted-loss|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1050ms" data-t="V7 v7b &middot; cycle 9|importance-sampling-reweighting|trained|0.6008"></i>
-<i class="cell trained" style="animation-delay:1053ms" data-t="V7 v7b &middot; cycle 10|importance-sampling-reweighting|trained|0.5865"></i>
-<i class="cell crash" style="animation-delay:1056ms" data-t="V7 v7b &middot; cycle 11|list-length-aware-ranking|crash|—"></i>
-<i class="cell skipped" style="animation-delay:1059ms" data-t="V7 v7b &middot; cycle 12|—|skipped|—"></i>
-<i class="cell trained" style="animation-delay:1062ms" data-t="V7 v7b &middot; cycle 13|dynamic-batching-for-distribution-matc|trained|0.6015"></i>
-<i class="cell skipped" style="animation-delay:1066ms" data-t="V7 v7b &middot; cycle 14|—|skipped|—"></i>
-<i class="cell trained" style="animation-delay:1069ms" data-t="V7 v7b &middot; cycle 15|importance-weighting|trained|0.5801"></i>
-<i class="cell blocked" style="animation-delay:1072ms" data-t="V7 v7b &middot; cycle 16|list-length-attention|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1075ms" data-t="V7 v7b &middot; cycle 17|explicit-length-feature|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:1078ms" data-t="V7 v7b &middot; cycle 18|explicit-length-feature|trained|0.6004"></i>
-<i class="cell trained" style="animation-delay:1082ms" data-t="V7 v7b &middot; cycle 19|explicit-length-feature|trained|0.5985"></i>
-<i class="cell blocked" style="animation-delay:1085ms" data-t="V7 v7b &middot; cycle 20|focal-loss|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1088ms" data-t="V7 v7b &middot; cycle 21|feature-distinguish-lengths|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:1091ms" data-t="V7 v7b &middot; cycle 22|feature-distinguish-lengths|trained|0.5994"></i>
-<i class="cell trained" style="animation-delay:1094ms" data-t="V7 v7b &middot; cycle 23|feature-distinguish-lengths|trained|0.5988"></i>
-<i class="cell trained" style="animation-delay:1098ms" data-t="V7 v7b &middot; cycle 24|list-length-feature|trained|0.6001"></i>
-<i class="cell trained" style="animation-delay:1101ms" data-t="V7 v7b &middot; cycle 25|list-length-feature|trained|0.5994"></i>
+<i class="cell trained" style="animation-delay:1066ms" data-t="V7 v7b &middot; cycle 1|eval-length-feature|trained|0.5958"></i>
+<i class="cell trained" style="animation-delay:1069ms" data-t="V7 v7b &middot; cycle 2|eval-length-feature|trained|0.5926"></i>
+<i class="cell trained" style="animation-delay:1072ms" data-t="V7 v7b &middot; cycle 3|eval-length-feature|trained|0.5932"></i>
+<i class="cell skipped" style="animation-delay:1075ms" data-t="V7 v7b &middot; cycle 4|—|skipped|—"></i>
+<i class="cell trained" style="animation-delay:1078ms" data-t="V7 v7b &middot; cycle 5|sampling-shorter-lists|trained|0.6015"></i>
+<i class="cell trained" style="animation-delay:1082ms" data-t="V7 v7b &middot; cycle 6|weighted-loss-balance|trained|0.5997"></i>
+<i class="cell trained" style="animation-delay:1085ms" data-t="V7 v7b &middot; cycle 7|weighted-loss-balance|trained|0.5859"></i>
+<i class="cell blocked" style="animation-delay:1088ms" data-t="V7 v7b &middot; cycle 8|domain-adaptation-weighted-loss|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1091ms" data-t="V7 v7b &middot; cycle 9|importance-sampling-reweighting|trained|0.6008"></i>
+<i class="cell trained" style="animation-delay:1094ms" data-t="V7 v7b &middot; cycle 10|importance-sampling-reweighting|trained|0.5865"></i>
+<i class="cell crash" style="animation-delay:1098ms" data-t="V7 v7b &middot; cycle 11|list-length-aware-ranking|crash|—"></i>
+<i class="cell skipped" style="animation-delay:1101ms" data-t="V7 v7b &middot; cycle 12|—|skipped|—"></i>
+<i class="cell trained" style="animation-delay:1104ms" data-t="V7 v7b &middot; cycle 13|dynamic-batching-for-distribution-matc|trained|0.6015"></i>
+<i class="cell skipped" style="animation-delay:1107ms" data-t="V7 v7b &middot; cycle 14|—|skipped|—"></i>
+<i class="cell trained" style="animation-delay:1110ms" data-t="V7 v7b &middot; cycle 15|importance-weighting|trained|0.5801"></i>
+<i class="cell blocked" style="animation-delay:1114ms" data-t="V7 v7b &middot; cycle 16|list-length-attention|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1117ms" data-t="V7 v7b &middot; cycle 17|explicit-length-feature|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:1120ms" data-t="V7 v7b &middot; cycle 18|explicit-length-feature|trained|0.6004"></i>
+<i class="cell trained" style="animation-delay:1123ms" data-t="V7 v7b &middot; cycle 19|explicit-length-feature|trained|0.5985"></i>
+<i class="cell blocked" style="animation-delay:1126ms" data-t="V7 v7b &middot; cycle 20|focal-loss|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1130ms" data-t="V7 v7b &middot; cycle 21|feature-distinguish-lengths|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:1133ms" data-t="V7 v7b &middot; cycle 22|feature-distinguish-lengths|trained|0.5994"></i>
+<i class="cell trained" style="animation-delay:1136ms" data-t="V7 v7b &middot; cycle 23|feature-distinguish-lengths|trained|0.5988"></i>
+<i class="cell trained" style="animation-delay:1139ms" data-t="V7 v7b &middot; cycle 24|list-length-feature|trained|0.6001"></i>
+<i class="cell trained" style="animation-delay:1142ms" data-t="V7 v7b &middot; cycle 25|list-length-feature|trained|0.5994"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V8</b> v8</div><div class="cells">
-<i class="cell trained" style="animation-delay:1104ms" data-t="V8 v8 &middot; cycle 1|data-augmentation|trained|0.6015"></i>
-<i class="cell trained" style="animation-delay:1107ms" data-t="V8 v8 &middot; cycle 2|data-augmentation|trained|0.6015"></i>
-<i class="cell trained" style="animation-delay:1110ms" data-t="V8 v8 &middot; cycle 3|dynamic-batching|trained|0.5941"></i>
-<i class="cell trained" style="animation-delay:1114ms" data-t="V8 v8 &middot; cycle 4|dynamic-batching|trained|0.6005"></i>
-<i class="cell trained" style="animation-delay:1117ms" data-t="V8 v8 &middot; cycle 5|dynamic-batching|trained|0.6007"></i>
+<i class="cell trained" style="animation-delay:1146ms" data-t="V8 v8 &middot; cycle 1|data-augmentation|trained|0.6015"></i>
+<i class="cell trained" style="animation-delay:1149ms" data-t="V8 v8 &middot; cycle 2|data-augmentation|trained|0.6015"></i>
+<i class="cell trained" style="animation-delay:1152ms" data-t="V8 v8 &middot; cycle 3|dynamic-batching|trained|0.5941"></i>
+<i class="cell trained" style="animation-delay:1155ms" data-t="V8 v8 &middot; cycle 4|dynamic-batching|trained|0.6005"></i>
+<i class="cell trained" style="animation-delay:1158ms" data-t="V8 v8 &middot; cycle 5|dynamic-batching|trained|0.6007"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V8</b> v8b</div><div class="cells">
-<i class="cell trained" style="animation-delay:1120ms" data-t="V8 v8b &middot; cycle 1|relative-position-feature|trained|0.6019"></i>
-<i class="cell blocked" style="animation-delay:1123ms" data-t="V8 v8b &middot; cycle 2|list-length-normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1126ms" data-t="V8 v8b &middot; cycle 3|curriculum-learning|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1130ms" data-t="V8 v8b &middot; cycle 4|oversampling-undersampling|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1133ms" data-t="V8 v8b &middot; cycle 5|normalization-as-feature|trained|0.6010"></i>
-<i class="cell trained" style="animation-delay:1136ms" data-t="V8 v8b &middot; cycle 6|normalization-as-feature|trained|0.6005"></i>
-<i class="cell trained" style="animation-delay:1139ms" data-t="V8 v8b &middot; cycle 7|normalization-as-feature|trained|0.5955"></i>
-<i class="cell trained" style="animation-delay:1142ms" data-t="V8 v8b &middot; cycle 8|list-length-normalization|trained|0.5988"></i>
-<i class="cell trained" style="animation-delay:1146ms" data-t="V8 v8b &middot; cycle 9|list-length-normalization|trained|0.5952"></i>
-<i class="cell trained" style="animation-delay:1149ms" data-t="V8 v8b &middot; cycle 10|list-length-normalization|trained|0.5962"></i>
-<i class="cell blocked" style="animation-delay:1152ms" data-t="V8 v8b &middot; cycle 11|class-balancing-loss|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1155ms" data-t="V8 v8b &middot; cycle 12|cost-sensitive-learning|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1158ms" data-t="V8 v8b &middot; cycle 13|weighted_loss_functions|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1162ms" data-t="V8 v8b &middot; cycle 14|dynamic-loss-adjustment|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1165ms" data-t="V8 v8b &middot; cycle 15|multi-task-learning|trained|0.6015"></i>
-<i class="cell blocked" style="animation-delay:1168ms" data-t="V8 v8b &middot; cycle 16|list-length-aware-sampling|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1171ms" data-t="V8 v8b &middot; cycle 17|weighted-loss-adjustment|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1174ms" data-t="V8 v8b &middot; cycle 18|dynamic-weighting-attention|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1178ms" data-t="V8 v8b &middot; cycle 19|weighted-evaluation|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1181ms" data-t="V8 v8b &middot; cycle 20|interaction-diversity-metrics|trained|0.6019"></i>
-<i class="cell blocked" style="animation-delay:1184ms" data-t="V8 v8b &middot; cycle 21|feature-length-normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1187ms" data-t="V8 v8b &middot; cycle 22|list-length-normalization|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1190ms" data-t="V8 v8b &middot; cycle 23|eval-length-groups|blocked|—"></i>
-<i class="cell blocked" style="animation-delay:1194ms" data-t="V8 v8b &middot; cycle 24|data-normalization|blocked|—"></i>
-<i class="cell trained" style="animation-delay:1197ms" data-t="V8 v8b &middot; cycle 25|normalize-and-binary-flag|trained|0.5971"></i>
+<i class="cell trained" style="animation-delay:1162ms" data-t="V8 v8b &middot; cycle 1|relative-position-feature|trained|0.6019"></i>
+<i class="cell blocked" style="animation-delay:1165ms" data-t="V8 v8b &middot; cycle 2|list-length-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1168ms" data-t="V8 v8b &middot; cycle 3|curriculum-learning|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1171ms" data-t="V8 v8b &middot; cycle 4|oversampling-undersampling|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1174ms" data-t="V8 v8b &middot; cycle 5|normalization-as-feature|trained|0.6010"></i>
+<i class="cell trained" style="animation-delay:1178ms" data-t="V8 v8b &middot; cycle 6|normalization-as-feature|trained|0.6005"></i>
+<i class="cell trained" style="animation-delay:1181ms" data-t="V8 v8b &middot; cycle 7|normalization-as-feature|trained|0.5955"></i>
+<i class="cell trained" style="animation-delay:1184ms" data-t="V8 v8b &middot; cycle 8|list-length-normalization|trained|0.5988"></i>
+<i class="cell trained" style="animation-delay:1187ms" data-t="V8 v8b &middot; cycle 9|list-length-normalization|trained|0.5952"></i>
+<i class="cell trained" style="animation-delay:1190ms" data-t="V8 v8b &middot; cycle 10|list-length-normalization|trained|0.5962"></i>
+<i class="cell blocked" style="animation-delay:1194ms" data-t="V8 v8b &middot; cycle 11|class-balancing-loss|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1197ms" data-t="V8 v8b &middot; cycle 12|cost-sensitive-learning|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1200ms" data-t="V8 v8b &middot; cycle 13|weighted_loss_functions|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1203ms" data-t="V8 v8b &middot; cycle 14|dynamic-loss-adjustment|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1206ms" data-t="V8 v8b &middot; cycle 15|multi-task-learning|trained|0.6015"></i>
+<i class="cell blocked" style="animation-delay:1210ms" data-t="V8 v8b &middot; cycle 16|list-length-aware-sampling|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1213ms" data-t="V8 v8b &middot; cycle 17|weighted-loss-adjustment|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1216ms" data-t="V8 v8b &middot; cycle 18|dynamic-weighting-attention|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1219ms" data-t="V8 v8b &middot; cycle 19|weighted-evaluation|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1222ms" data-t="V8 v8b &middot; cycle 20|interaction-diversity-metrics|trained|0.6019"></i>
+<i class="cell blocked" style="animation-delay:1226ms" data-t="V8 v8b &middot; cycle 21|feature-length-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1229ms" data-t="V8 v8b &middot; cycle 22|list-length-normalization|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1232ms" data-t="V8 v8b &middot; cycle 23|eval-length-groups|blocked|—"></i>
+<i class="cell blocked" style="animation-delay:1235ms" data-t="V8 v8b &middot; cycle 24|data-normalization|blocked|—"></i>
+<i class="cell trained" style="animation-delay:1238ms" data-t="V8 v8b &middot; cycle 25|normalize-and-binary-flag|trained|0.5971"></i>
 </div></div>
 </div></section>
 <section class="reveal"><div class="eyebrow">Results</div>
@@ -535,12 +550,14 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <line class="base" x1="54" y1="193.2" x2="860" y2="193.2"/><text class="lbl" x="866" y="197.2">0.6016 baseline</text>
 <line class="gridline" x1="54" y1="202.8" x2="860" y2="202.8"/><text class="lbl" x="866" y="206.8">0.6014 start</text>
 <circle fill="var(--kept)" cx="80.0" cy="164.4" r="6"><title>V4 05-autonomy-benchmark-21cyc: 0.6022 — temporal-decay-relevance</title></circle><text class="tick" x="80.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="80.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
-<circle fill="var(--kept)" cx="188.0" cy="121.2" r="6"><title>V4 06-clean-run-14cyc: 0.6031 — weighted-loss-imbalance</title></circle><text class="tick" x="188.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="188.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
-<circle fill="var(--kept)" cx="296.0" cy="164.4" r="6"><title>V5 agent_derive: 0.6022 — temporal-decay-weights</title></circle><text class="tick" x="296.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="296.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
-<circle fill="var(--kept)" cx="404.0" cy="135.6" r="6"><title>V4 run07: 0.6028 — temporal-patterns</title></circle><text class="tick" x="404.0" y="121.6" text-anchor="middle">0.6028</text><text class="tick" x="404.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
-<circle fill="var(--kept)" cx="512.0" cy="202.8" r="6"><title>V5 v5_exploit: 0.6014 — user-cluster-features</title></circle><text class="tick" x="512.0" y="188.8" text-anchor="middle">0.6014</text><text class="tick" x="512.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
-<circle fill="var(--kept)" cx="620.0" cy="121.2" r="6"><title>V6 v6: 0.6031 — class-weighted-loss</title></circle><text class="tick" x="620.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="620.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
-<circle fill="var(--kept)" cx="728.0" cy="164.4" r="6"><title>V6 v6c: 0.6022 — temporal-activity-features</title></circle><text class="tick" x="728.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="728.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
+<circle fill="var(--kept)" cx="164.0" cy="121.2" r="6"><title>V4 06-clean-run-14cyc: 0.6031 — weighted-loss-imbalance</title></circle><text class="tick" x="164.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="164.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
+<circle fill="var(--kept)" cx="248.0" cy="164.4" r="6"><title>V5 agent_derive: 0.6022 — temporal-decay-weights</title></circle><text class="tick" x="248.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="248.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
+<circle fill="var(--kept)" cx="332.0" cy="159.6" r="6"><title>? final: 0.6023 — curriculum-learning</title></circle><text class="tick" x="332.0" y="145.6" text-anchor="middle">0.6023</text><text class="tick" x="332.0" y="278.0" text-anchor="middle" opacity=".75">?</text>
+<circle fill="var(--kept)" cx="416.0" cy="78.0" r="6"><title>? final: 0.6040 — length-normalization</title></circle><text class="tick" x="416.0" y="64.0" text-anchor="middle">0.6040</text><text class="tick" x="416.0" y="278.0" text-anchor="middle" opacity=".75">?</text>
+<circle fill="var(--kept)" cx="500.0" cy="135.6" r="6"><title>V4 run07: 0.6028 — temporal-patterns</title></circle><text class="tick" x="500.0" y="121.6" text-anchor="middle">0.6028</text><text class="tick" x="500.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
+<circle fill="var(--kept)" cx="584.0" cy="202.8" r="6"><title>V5 v5_exploit: 0.6014 — user-cluster-features</title></circle><text class="tick" x="584.0" y="188.8" text-anchor="middle">0.6014</text><text class="tick" x="584.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
+<circle fill="var(--kept)" cx="668.0" cy="121.2" r="6"><title>V6 v6: 0.6031 — class-weighted-loss</title></circle><text class="tick" x="668.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="668.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
+<circle fill="var(--kept)" cx="752.0" cy="164.4" r="6"><title>V6 v6c: 0.6022 — temporal-activity-features</title></circle><text class="tick" x="752.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="752.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
 <circle fill="var(--kept)" cx="836.0" cy="126.0" r="6"><title>V6 v6c_gpt55: 0.6030 — focal-loss-weighting</title></circle><text class="tick" x="836.0" y="112.0" text-anchor="middle">0.6030</text><text class="tick" x="836.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
 </svg></figure>
 <div class="callout"><p>The agent reached <b class="mono">0.6031</b> twice, in different architecture generations, both times by reweighting the training objective, and never by the route the human took. Both were confirmed over five seeds by the loop itself before acceptance.</p></div></section>
@@ -552,16 +569,18 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <section class="reveal"><div class="eyebrow">Where the effort went</div>
 <h2>The model never changed</h2>
 <p class="lede">The scoring function is a factorisation machine throughout, the same architecture as the official baseline. Every accepted improvement came from the training objective or the input features. <b>35 experiments edited the model and none of them was accepted.</b></p><div class="tblwrap"><table><thead><tr><th>Module</th><th class="num">Experiments</th><th class="num">Share</th><th>What it controls</th></tr></thead><tbody>
-<tr><td class="mono">train.py</td><td class="num">173</td><td class="num">51%</td><td style="color:var(--muted)">objective, optimiser, batching</td></tr>
-<tr><td class="mono">features.py</td><td class="num">129</td><td class="num">38%</td><td style="color:var(--muted)">what the model sees</td></tr>
+<tr><td class="mono">train.py</td><td class="num">180</td><td class="num">51%</td><td style="color:var(--muted)">objective, optimiser, batching</td></tr>
+<tr><td class="mono">features.py</td><td class="num">135</td><td class="num">39%</td><td style="color:var(--muted)">what the model sees</td></tr>
 <tr><td class="mono">model.py</td><td class="num">35</td><td class="num">10%</td><td style="color:var(--muted)">the scoring function itself</td></tr>
 </tbody></table></div>
 <h2 style="margin-top:52px">Every accepted result</h2>
 <div class="tblwrap"><table><thead><tr><th class="num">Primary</th><th>Module</th><th>Technique</th></tr></thead><tbody>
+<tr class="win"><td class="num">0.6040</td><td class="mono">features.py</td><td>length-normalization</td></tr>
 <tr class="win"><td class="num">0.6031</td><td class="mono">train.py</td><td>weighted-loss-imbalance</td></tr>
 <tr class="win"><td class="num">0.6031</td><td class="mono">train.py</td><td>class-weighted-loss</td></tr>
 <tr class="win"><td class="num">0.6030</td><td class="mono">train.py</td><td>focal-loss-weighting</td></tr>
 <tr class="win"><td class="num">0.6028</td><td class="mono">features.py</td><td>temporal-patterns</td></tr>
+<tr class="win"><td class="num">0.6023</td><td class="mono">train.py</td><td>curriculum-learning</td></tr>
 <tr class="win"><td class="num">0.6022</td><td class="mono">features.py</td><td>temporal-decay-weights</td></tr>
 <tr class="win"><td class="num">0.6022</td><td class="mono">features.py</td><td>temporal-decay-relevance</td></tr>
 <tr class="win"><td class="num">0.6022</td><td class="mono">features.py</td><td>temporal-activity-features</td></tr>
@@ -575,6 +594,7 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <h2>Every generation, including the ones that failed</h2>
 <p class="lede">Each generation added a stage in response to a measured failure of the last. Two were built, measured, and reverted.</p>
 <div class="tblwrap"><table><thead><tr><th>Gen</th><th class="num">Runs</th><th class="num">Improved</th><th class="num">Experiments</th><th class="num">Best</th></tr></thead><tbody>
+<tr class="win"><td><span class="pill">?</span></td><td class="num">1</td><td class="num">1</td><td class="num">13</td><td class="num">0.6040</td></tr>
 <tr><td><span class="pill">V1</span></td><td class="num">1</td><td class="num">0</td><td class="num">20</td><td class="num">—</td></tr>
 <tr><td><span class="pill">V2</span></td><td class="num">1</td><td class="num">0</td><td class="num">25</td><td class="num">—</td></tr>
 <tr><td><span class="pill">V3</span></td><td class="num">1</td><td class="num">0</td><td class="num">25</td><td class="num">—</td></tr>
@@ -587,13 +607,13 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <section class="reveal"><div class="eyebrow">Cost</div>
 <h2>Where the tokens go</h2>
 <p class="lede">Five roles, each on the model it needs. The judge writes only prose because its verdict is arithmetic; the coder is the measured bottleneck and the largest single cost.</p><div class="tblwrap"><table><thead><tr><th>Role</th><th class="num">Tokens</th><th class="num">Share</th><th>Job</th></tr></thead><tbody>
-<tr><td class="mono">coder</td><td class="num">1696K</td><td class="num">47%</td><td style="color:var(--muted)">write correct numpy</td></tr>
-<tr><td class="mono">inventor</td><td class="num">890K</td><td class="num">25%</td><td style="color:var(--muted)">propose interventions</td></tr>
-<tr><td class="mono">classifier</td><td class="num">704K</td><td class="num">19%</td><td style="color:var(--muted)">name the problem</td></tr>
-<tr><td class="mono">analyst</td><td class="num">289K</td><td class="num">8%</td><td style="color:var(--muted)">pick tools, report numbers</td></tr>
-<tr><td class="mono">reflector</td><td class="num">50K</td><td class="num">1%</td><td style="color:var(--muted)">explain a decision already made</td></tr>
+<tr><td class="mono">coder</td><td class="num">1752K</td><td class="num">47%</td><td style="color:var(--muted)">write correct numpy</td></tr>
+<tr><td class="mono">inventor</td><td class="num">913K</td><td class="num">24%</td><td style="color:var(--muted)">propose interventions</td></tr>
+<tr><td class="mono">classifier</td><td class="num">723K</td><td class="num">19%</td><td style="color:var(--muted)">name the problem</td></tr>
+<tr><td class="mono">analyst</td><td class="num">295K</td><td class="num">8%</td><td style="color:var(--muted)">pick tools, report numbers</td></tr>
+<tr><td class="mono">reflector</td><td class="num">51K</td><td class="num">1%</td><td style="color:var(--muted)">explain a decision already made</td></tr>
 </tbody></table></div>
-<div class="callout"><p><b class="mono">4.09</b> GPU-hours across <b class="mono">9.1</b> hours of wall clock, on a laptop CPU with no accelerator. numpy and pandas only.</p></div></section>
+<div class="callout"><p><b class="mono">4.9</b> GPU-hours across <b class="mono">10.1</b> hours of wall clock, on a laptop CPU with no accelerator. numpy and pandas only.</p></div></section>
 <section class="reveal"><div class="eyebrow">Run ledger</div>
 <h2>Every run, reported in full</h2>
 <p class="lede">Including the architecture generations that were built, measured, and reverted because they did not produce a win.</p>
@@ -605,6 +625,7 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <tr class="win"><td class="mono">05-autonomy-benchmark-21cy</td><td><span class="pill">V4</span></td><td class="num">21</td><td class="num">42%</td><td class="num">1</td><td class="num">0.6022</td><td class="num">267K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">06-clean-run-14cyc</td><td><span class="pill">V4</span></td><td class="num">14</td><td class="num">64%</td><td class="num">1</td><td class="num">0.6031</td><td class="num">143K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">agent_derive</td><td><span class="pill">V5</span></td><td class="num">23</td><td class="num">61%</td><td class="num">1</td><td class="num">0.6022</td><td class="num">207K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
+<tr class="win"><td class="mono">final</td><td><span class="pill">?</span></td><td class="num">13</td><td class="num">92%</td><td class="num">2</td><td class="num">0.6040</td><td class="num">105K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">run07</td><td><span class="pill">V4</span></td><td class="num">20</td><td class="num">50%</td><td class="num">1</td><td class="num">0.6028</td><td class="num">228K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr><td class="mono">v5</td><td><span class="pill">V5</span></td><td class="num">30</td><td class="num">45%</td><td class="num">0</td><td class="num">—</td><td class="num">303K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">max_iterations</td></tr>
 <tr class="win"><td class="mono">v5_exploit</td><td><span class="pill">V5</span></td><td class="num">7</td><td class="num">83%</td><td class="num">1</td><td class="num">0.6014</td><td class="num">—</td><td class="mono" style="font-size:11.5px;color:var(--muted)">—</td></tr>

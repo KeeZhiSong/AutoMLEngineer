@@ -136,6 +136,34 @@ Reproduce:
     python3 tools_preflight.py --expect agent      # confirms by score
     python3 make_submission.py --out submission.csv --hold-test-score
 
+## Cost: what the revision mechanism was worth
+
+The loop could revise a near miss up to twice before moving on. Measured across
+every run in this repository, that mechanism fired **93 times and was never once
+accepted**; the best a revision ever scored was 0.6019, below the incumbent it
+was trying to beat. It consumed **675,815 tokens, 16% of the project's entire
+spend**, for zero accepted results.
+
+Disabling it (`MAX_REVISIONS = 0`) produced the cheapest keep-bearing run of the
+project:
+
+| run | revisions | tokens | contract satisfaction | keeps |
+|---|---|---|---|---|
+| 06-clean-run-14cyc | on | 142,612 | 50% | 1 |
+| v6c_gpt55 | on | 146,488 | 62% | 1 |
+| v6 | on | 165,813 | 60% | 1 |
+| **final** | **off** | **105,304** | **92%** | **2** |
+
+A 26-36% reduction against comparable runs. The saving appears in the run total
+rather than the per-cycle rate, because revisions consumed whole extra cycles
+against patches that had already failed.
+
+93 samples of a mechanism that never fired is not proof it cannot work. It is
+sufficient reason to stop paying for it. The anomaly board now does the job
+revisions were meant to do: a near miss stays on the board with its attempt
+history, available to a later cycle without re-running the loop against a patch
+that already failed.
+
 ## Resource report
 
 | | |
