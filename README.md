@@ -253,20 +253,28 @@ The baseline is reproduced to within the published seed variance:
 **A human-tuned configuration reaches the same 0.6038** by a different route:
 listwise softmax with evaluation-length training groups (+0.0012), plus a
 learning rate retuned for that new objective (+0.0010; the inherited 1e-3 had
-been tuned for a pointwise loss). It is kept in `artifacts/human-best/` as the
-benchmark the agent is measured against, and is **not** what is submitted. Against a matched control the paired t is
-11.3 on 4 df, all five seeds positive, complete separation; the grouping effect
-also held across four separate temporal windows (14/14 paired seeds).
-`submission.csv` is generated from this config and passes the organisers' checker.
-Both configurations are reproducible by score, not by assertion:
+been tuned for a pointwise loss). Against a matched control the paired t is 11.3
+on 4 df, all five seeds positive, complete separation; the grouping effect also
+held across four separate temporal windows (14/14 paired seeds). It is kept in
+`artifacts/human-best/` as the benchmark the agent is measured against, and is
+**not** what is submitted.
 
-    cp artifacts/human-best/*.py solution/ && python3 tools_preflight.py --expect winning
-    cp artifacts/agent-best/*.py  solution/ && python3 tools_preflight.py --expect agent
+All three configurations are reproducible by score, not by assertion:
 
-**The agent independently reaches 0.6031** from a 0.6014 reference, with no
-answers in its technique library, 5-seed confirmed in-loop, zero manual
-interventions, by a different route (a reweighted logloss). Across V4–V6 it
-improves on **7 of 10 clean-reference runs**; the three generations before that
+    cp artifacts/agent-best/*.py       solution/ && python3 tools_preflight.py --expect agent
+    cp artifacts/human-best/*.py       solution/ && python3 tools_preflight.py --expect winning
+    cp artifacts/agent-best-0.6031/*.py solution/  # the previous agent best
+
+**The agent independently reaches 0.6038** from a 0.6014 reference, with no
+answers in its technique library and zero manual interventions: 20-seed mean
+0.6038, sd 0.0003, every seed above the baseline. **`submission.csv` is generated
+from this configuration** and passes the organisers' checker.
+
+It reaches the human score by a different route: curriculum learning over
+sequence length plus a length-normalisation feature, rather than the human's
+listwise objective and retuned learning rate. The run converged in 13 of the 50
+permitted iterations on 105,304 tokens and 59 minutes. Across V4–V6 the loop
+improves on **8 of 11 clean-reference runs**; the three generations before that
 produced zero improvements in 70+ cycles.
 
 The shipped pipeline is **V6**. V7 and V8 were built, tested over three runs and
@@ -293,7 +301,7 @@ perception.
 5-seed confirmed and reproducible, but it is a small effect on a saturated
 benchmark, not a breakthrough.
 
-**It does not improve every run.** 7 of 10 clean-reference runs under V4-V6.
+**It does not improve every run.** 8 of 11 clean-reference runs under V4-V6.
 Run-to-run variance exceeds the difference between architecture generations, so
 no version is separable from another by result alone.
 
