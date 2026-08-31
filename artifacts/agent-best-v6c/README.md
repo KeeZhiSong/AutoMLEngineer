@@ -7,7 +7,7 @@ task-specific answers in its library and zero manual interventions.
     module    : train.py
     valid     : 0.6030 (5-seed confirmed by the loop before acceptance)
     vs baseline 0.6016 : +0.0014
-    converged after 13 cycles, 146K tokens, 0 crashes
+    converged after 9 cycles (13 logged experiments), 146K tokens, 0 crashes
 
 The exploit stage then fired on the learning rate and measured a clean peak:
 

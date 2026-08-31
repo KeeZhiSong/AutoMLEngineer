@@ -6,7 +6,8 @@ task-specific answers in its technique library and zero manual interventions.
     valid     : 0.6038 over 20 seeds (sd 0.0003, min 0.6033, max 0.6043)
     vs baseline 0.6016 : +0.0022
     seed 0    : 0.6040
-    run       : converged in 13 cycles, 105,304 tokens, 59 minutes, 0.81 GPU-hours
+    run       : converged in 5 cycles (13 logged experiments, 8 of them exploit
+                trials), 105,304 tokens, 59 minutes, 0.81 GPU-hours
 
 Two accepted interventions, in order:
 
