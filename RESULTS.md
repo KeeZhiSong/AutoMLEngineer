@@ -4,9 +4,12 @@ TikTok TechJam 2026, Track 2. All scores are **validation** `primary =
 mean(GAUC, nDCG@5)` on the official split, computed by the organisers' unmodified
 `official/evaluate.py` (SHA-256 pinned in `official/VENDORED.sha256`).
 
-**The test split has been scored zero times.** `submission.csv` contains test
-predictions; the metric is deliberately withheld so no selection decision can be
-contaminated by it.
+**The test split was scored exactly once, after the configuration was frozen.**
+It was unreachable for the whole search: the agent's runner is never called with
+`evaluate_test`, so every keep/revert decision, the exploit sweeps and the
+20-seed confirmation all ran on validation alone. The single test evaluation
+below scores the already-written `submission.csv` through the organisers'
+unmodified `evaluate.py`, and no selection decision followed it.
 
 ## Headline
 
@@ -150,6 +153,22 @@ The value at acceptance was a single seed. It cleared the tie-break band by
 exploit sweep read 0.6040 on seed 0 and measured 0.6034 across five. It was
 therefore measured at n=20 before being used for anything.
 
+### Hidden test, scored once
+
+`submission.csv` scored through `official/evaluate.py`, read with
+`official/submit.py`'s own alignment-checking reader, on all 170,588 test rows:
+
+| metric | ours | official baseline | absolute delta |
+|---|---|---|---|
+| GAUC | 0.6639 | 0.6610 | **+0.0029** |
+| nDCG@5 | 0.5304 | 0.5282 | **+0.0022** |
+| primary (mean of the two) | **0.5972** | 0.5946 | **+0.0026** |
+| **score_dataset** (equal-weighted mean of the metric deltas) | | | **+0.0026** |
+
+The gain **held on test and slightly grew**: +0.0022 on validation against
++0.0026 on test. That is the check the validation work was for. Nothing was
+selected on it, and nothing changed after it.
+
 Bonus benchmarks (KuaiRand-1k, KuaiRand-27k) were not attempted.
 
 > **On the two iteration counts.** `workspace_final/summary.json` reports
@@ -166,6 +185,7 @@ Reproduce:
     cp artifacts/agent-best/*.py solution/
     python3 tools_preflight.py --expect agent      # confirms by score
     python3 make_submission.py --out submission.csv --hold-test-score
+    python3 tools_score_test.py                    # the single test evaluation
 
 ## Cost: what the revision mechanism was worth
 

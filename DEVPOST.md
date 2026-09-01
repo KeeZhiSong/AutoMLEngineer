@@ -31,7 +31,7 @@ This solution addresses it directly:
 | iterate and reflect | keep/revert decided arithmetically against one published seed std; failures typed so a botched implementation never counts as evidence against the idea it botched |
 | stop sensibly | the organisers' own convergence rule, epsilon = 0.002 over N = 3 |
 | be reproducible | every configuration is verified **by score**, never by asserting what a file contains. The scorer is the organisers' `evaluate.py`, vendored unmodified and SHA-256 pinned |
-| be honest | the test split was scored **zero** times; every false win, mine and the agent's, is documented rather than quietly dropped |
+| be honest | the test split was unreachable during the search and scored **once**, after the config was frozen; every false win, mine and the agent's, is documented rather than quietly dropped |
 
 ### The task
 
@@ -78,6 +78,18 @@ Every number in that table is a 20-seed mean, so the metrics and the primary
 come from one measurement rather than two. Seed 0 alone, the value the loop
 accepted at the time, reads 0.6705 / 0.5375 / 0.6040; it sits a little above
 average, which is why the submitted figure is the 20-seed one.
+
+**On the hidden test set**, scored once after the configuration was frozen:
+
+| metric | agent | official FM baseline | absolute delta |
+|---|---|---|---|
+| GAUC | 0.6639 | 0.6610 | **+0.0029** |
+| nDCG@5 | 0.5304 | 0.5282 | **+0.0022** |
+| primary | **0.5972** | 0.5946 | **+0.0026** |
+
+The gain held on test and grew slightly, +0.0022 on validation against +0.0026
+on test. Test was unreachable during the search, so nothing was ever selected
+on it.
 
 It got there by a different route from the human configuration. The human path
 was a listwise objective trained on evaluation-length lists, plus a learning rate
@@ -447,10 +459,13 @@ The whole project, across 21 recorded runs:
   no version is separable from another by result alone, and n is small.
 - **The practical ceiling for this approach looks like ~0.604** against an oracle
   of 0.8484. Getting past it needs a different mechanism, not more tuning.
-- **The test split has been scored zero times.** `submission.csv` holds test
-  predictions and the metric was deliberately withheld, so no selection decision
-  could be contaminated by it. That is the right call, and it also means I cannot
-  tell you the test score.
+- **The test split was scored once, at the very end.** It was unreachable for
+  the whole search, so no selection decision could be contaminated by it. Scored
+  once after the configuration was frozen, the submission reaches **test primary
+  0.5972** against the baseline's 0.5946: **score_dataset +0.0026**, with the
+  validation gain of +0.0022 holding and growing slightly. That is a real
+  generalisation check rather than a claim, but it is still a small effect on a
+  saturated benchmark.
 
 ## Team
 

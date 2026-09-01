@@ -8,6 +8,8 @@ task-specific answers in its technique library and zero manual interventions.
                 all 20 seeds above baseline; per-seed values in
                 workspace_final/seed_sweep_20.json
     vs baseline 0.6016 : +0.0022
+    test      : 0.5972 vs baseline 0.5946, score_dataset +0.0026
+                (GAUC 0.6639 / nDCG@5 0.5304), scored once after freeze
     seed 0    : 0.6040
     run       : converged in 5 cycles (13 logged experiments, 8 of them exploit
                 trials), 105,304 tokens, 59 minutes wall-clock, 0 GPU-hours

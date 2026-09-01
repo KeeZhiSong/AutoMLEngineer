@@ -312,8 +312,13 @@ The shipped pipeline is **V6**. V7 and V8 were built, tested over three runs and
 reverted, they fixed the failures they targeted without producing a win. That
 work is preserved on branch `v7-v8-investigation`; see `RESULTS.md`.
 
-The test split has been scored **zero** times, the CSV holds test predictions,
-but the test metric is deliberately withheld until the config is final.
+The test split was scored **exactly once**, after the configuration was frozen.
+It was unreachable during the search: the runner is never called with
+`evaluate_test`, so every keep/revert decision and the 20-seed confirmation ran
+on validation alone. Scored once at the end, `submission.csv` reaches **test
+primary 0.5972** against the baseline's 0.5946, a **score_dataset of +0.0026**
+(GAUC +0.0029, nDCG@5 +0.0022). The validation gain of +0.0022 therefore held,
+and grew slightly, on test.
 
 Full results, the run-by-run reliability record, the seven directions closed by
 measurement, and an honest accounting of every false win, the agent's two and
@@ -327,7 +332,7 @@ the harness's ten, are in [`RESULTS.md`](RESULTS.md).
 | per-iteration run log | [`RUNLOG.md`](RUNLOG.md), generated from `workspace_final/experiments.jsonl` by `tools_build_runlog.py`; the unified diff applied in each cycle is in [`runlog_diffs/`](runlog_diffs/) |
 | raw run logs, every run | `workspace_final/`, `workspace_*/`, `archive/runs/` |
 | manual-intervention summary | [`RUNLOG.md`](RUNLOG.md) and [`RESULTS.md`](RESULTS.md): **0** |
-| final model output | [`submission.csv`](submission.csv), test split, 170,588 rows, passes `official/submit.py --check` |
+| final model output | [`submission.csv`](submission.csv), test split, 170,588 rows, passes `official/submit.py --check`; scored once by `tools_score_test.py` at **test primary 0.5972**, score_dataset **+0.0026** |
 | results table + resource usage | [`RESULTS.md`](RESULTS.md) |
 | published search ledger | [`docs/index.html`](docs/index.html) |
 
