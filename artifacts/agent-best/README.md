@@ -10,7 +10,8 @@ task-specific answers in its technique library and zero manual interventions.
     vs baseline 0.6016 : +0.0022
     seed 0    : 0.6040
     run       : converged in 5 cycles (13 logged experiments, 8 of them exploit
-                trials), 105,304 tokens, 59 minutes, 0.81 GPU-hours
+                trials), 105,304 tokens, 59 minutes wall-clock, 0 GPU-hours
+                (0.81 CPU-core-hours of training)
 
 Two accepted interventions, in order:
 

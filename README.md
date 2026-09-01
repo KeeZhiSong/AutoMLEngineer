@@ -190,10 +190,40 @@ false wins.**
 evidence), `INSIGHTS.md` / `DEAD_ENDS.md`, and `summary.json` at exit.
 
 ### Convergence
-Converged when validation primary has not improved by more than **ε = 0.002**
-over **3 consecutive** cycles. Note the tension: no single step on this task has
-ever gained that much, so every genuine win is sub-ε and the run stops shortly
-after succeeding. Convergence is not evaluated on a winning cycle.
+The organisers' default rule, implemented literally. Converged when validation
+primary has not improved by more than **ε = 0.002** over **3 consecutive**
+scored cycles. We use the published default rather than declaring our own ε, N
+or minimum-iteration floor.
+
+The rule is **cumulative**, as the organisers' FAQ specifies: the best score
+over the last N scored iterations is compared against the best from *before*
+that window, not against the immediately preceding value. `has_converged()` in
+`solution/scoring.py` is exactly that:
+
+```python
+best_before = max(primary_history[:-n])
+recent_best = max(primary_history[-n:])
+return (recent_best - best_before) <= epsilon
+```
+
+**A cycle that produces no validation score does not advance or reset the
+window.** The FAQ requires this, and the submitted run exercised it: cycle 4
+failed its semantic contract, never trained, and appended nothing to
+`primary_history`, so the window was unaffected. It still counts toward the
+50-iteration cap.
+
+The run stopped on this rule after 5 cycles:
+
+```
+best before the last 3 : 0.6023   [0.6023, 0.6023, 0.5981]
+best in the last 3     : 0.6040   [0.6040, 0.6040, 0.6037]
+improvement            : 0.0017  <=  0.002  ->  CONVERGED
+```
+
+Note the tension: no single step on this task has ever gained more than ε, so
+every genuine win is sub-ε and the run stops shortly after succeeding. The
+50-iteration budget was never the binding constraint; the stopping rule was.
+Convergence is not evaluated on a winning cycle.
 
 ## Guards, each added because something got past the previous set
 

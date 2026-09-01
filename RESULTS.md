@@ -113,8 +113,9 @@ Deliverables 3 and 4 describe one run. This is it.
 | **iterations used** | **5 research cycles of the 50 cap**, stopped by convergence |
 | logged experiments | **13** = the 5 cycles + 8 EXPLOIT trials; 12 were scored training runs |
 | **total tokens (in + out)** | **105,304** |
-| **agent wall-clock** | **59 minutes** |
-| **GPU-hours** | **0.81** (CPU only; no accelerator was used) |
+| **agent wall-clock** (the scored compute measure) | **59 minutes** of the 6 h ceiling |
+| **GPU-hours** | **0** — no GPU was used at any point |
+| training compute | 0.81 CPU-core-hours (the ledger's `gpu_seconds` field records wall time on CPU, not accelerator time) |
 | **manual interventions** | **0** |
 
 Two accepted interventions, in order:
@@ -201,8 +202,9 @@ that already failed.
 | research runs executed | 21 with a committed run log |
 | experiments, all runs | **387** (219 completed, 102 stopped by contract, 49 crashed and recovered, 15 skipped, 2 timed out) |
 | LLM tokens, all runs | **4,341,703** |
-| GPU-hours, all runs | **5.20** (CPU-only; numpy, no accelerator) |
-| single run cost | 82K–466K tokens, 0.02–0.46 GPU-hours |
+| GPU-hours, all runs | **0** — no GPU was used at any point |
+| training compute, all runs | **5.20 CPU-core-hours** (numpy on one laptop CPU) |
+| single run cost | 82K–466K tokens, 0.02–0.46 CPU-core-hours |
 | best single run | 0.6030 at 146K tokens, converged in 9 cycles (13 logged experiments) |
 | manual interventions | **0** in every run |
 | hardware | one laptop CPU; the baseline trains in ~15s |
@@ -259,7 +261,9 @@ Before the leak guard existed, one such patch scored 0.6449 and was accepted.
    in 100% of cycles and the two tools that reveal the decisive fact in 14% and
    0%. The cheapest model in the pipeline was deciding what the expensive ones
    could think about.
-6. **The convergence rule sits above the effect size.** ε = 0.002, but no single
+6. **The convergence rule sits above the effect size**, which is why the run
+   used 5 of the 50 permitted iterations rather than being cut short by budget.
+   ε = 0.002, but no single
    step on this task has gained that much, so any real win is sub-ε and the run
    stops shortly after succeeding.
 7. Bonus benchmarks (KuaiRand-1k / 27k) not attempted.

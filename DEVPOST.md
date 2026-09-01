@@ -256,8 +256,8 @@ the leak scanner, `signal` for the per-cycle timeout, `difflib` for the run-log
 diffs, `json` for the append-only ledger.
 
 **No deep-learning framework.** The model is a factorisation machine written in
-numpy, which is why 21 full research runs cost 5.2 GPU-hours on a laptop CPU with
-no accelerator involved at any point. The organisers' baseline is numpy-only and
+numpy, which is why 21 full research runs cost 5.2 CPU-core-hours on a laptop
+and **zero GPU-hours**, with no accelerator involved at any point. The organisers' baseline is numpy-only and
 I kept that property deliberately: it makes a full training run take about 15
 seconds, and a loop that can afford to measure is a loop that can afford to
 disbelieve itself.
@@ -404,10 +404,11 @@ The submitted run:
 | | |
 |---|---|
 | total tokens (input + output) | **105,304** |
-| wall-clock | **59 minutes** |
+| **agent wall-clock** (the scored compute measure) | **59 minutes** of the 6 h ceiling |
 | iterations used | **5 research cycles of the 50 cap**, stopped by convergence |
 | logged experiments | 13 = the 5 cycles + 8 exploit trials; 12 were scored training runs |
-| GPU-hours | **0.81**, CPU only, no accelerator |
+| GPU-hours | **0** — no GPU was used at any point |
+| training compute | 0.81 CPU-core-hours |
 | manual interventions | **0** |
 
 The whole project, across 21 recorded runs:
@@ -417,7 +418,8 @@ The whole project, across 21 recorded runs:
 | experiments | **387** (219 completed, 102 stopped by contract, 49 crashed and recovered, 15 skipped, 2 timed out) |
 | accepted improvements | 10 |
 | tokens | **4,341,703** |
-| GPU-hours | **5.20**, one laptop CPU |
+| GPU-hours | **0** — no GPU was used at any point |
+| training compute | 5.20 CPU-core-hours, one laptop CPU |
 | manual interventions | **0** |
 
 ## What's next

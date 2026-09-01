@@ -115,8 +115,11 @@ def build(workspace: Path, out_dir: Path) -> str:
     A(f"| official baseline | {summary['baseline_primary']} |")
     A(f"| delta vs baseline | **{summary['delta_vs_baseline']:+.4f}** |")
     A(f"| total tokens (input + output) | **{summary['tokens_in'] + summary['tokens_out']:,}** |")
-    A(f"| wall-clock | {summary['wall_seconds'] / 60:.0f} min |")
-    A(f"| GPU-hours | {summary['gpu_hours']} (CPU only; no accelerator used) |")
+    A(f"| **agent wall-clock** (the scored compute measure) | "
+      f"**{summary['wall_seconds'] / 60:.0f} min** of the 6 h ceiling |")
+    A("| **GPU-hours** | **0** — no GPU was used at any point |")
+    A(f"| training compute | {summary['gpu_hours']} CPU-core-hours (the ledger's "
+      f"`gpu_seconds` field records wall time on CPU) |")
     A(f"| **manual interventions** | **{summary['manual_interventions']}** |")
 
     A("\n### Manual interventions\n")
