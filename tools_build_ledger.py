@@ -36,6 +36,7 @@ VERSION = {
     "v6": "V6", "v6b": "V6", "v6c": "V6",
     "v6c_verify": "V6", "v6c_gpt55": "V6",
     "v7": "V7", "v7b": "V7", "v8": "V8", "v8b": "V8",
+    "final": "V6",          # the submitted run
 }
 
 
@@ -271,10 +272,33 @@ def build_html(data: dict) -> str:
          f'<div class="stat"><span class="v">{blocked}</span>'
          '<span class="l">Stopped before training</span></div>',
          f'<div class="stat"><span class="v">{data["gpu"]}</span>'
-         '<span class="l">GPU-hours, CPU only</span></div>',
+         '<span class="l">CPU-core-hours, 0 GPU</span></div>',
          '<div class="stat"><span class="v">0</span>'
          '<span class="l">Manual interventions</span></div>',
          '</div></header>']
+
+    # ---- the submitted result -------------------------------------------
+    # The ledger showed every experiment but never the number they produced.
+    h += ['<section class="reveal"><div class="eyebrow">The result</div>',
+          '<h2>What was submitted</h2>',
+          '<p class="lede">The validation-best checkpoint at convergence, measured '
+          'over 20 seeds, then scored once on the hidden test split after the '
+          'configuration was frozen. Test was unreachable during the search, so no '
+          'selection decision could be contaminated by it.</p>',
+          '<table class="runs"><thead><tr><th>split</th><th>GAUC</th>'
+          '<th>nDCG@5</th><th>primary</th><th>baseline primary</th>'
+          '<th>score_dataset</th></tr></thead><tbody>',
+          '<tr><td>validation, 20-seed mean</td><td>0.6702</td><td>0.5373</td>'
+          '<td><b>0.6038</b></td><td>0.6016</td><td><b>+0.0022</b></td></tr>',
+          '<tr><td>hidden test, scored once</td><td>0.6639</td><td>0.5304</td>'
+          '<td><b>0.5972</b></td><td>0.5946</td><td><b>+0.0026</b></td></tr>',
+          '</tbody></table>',
+          '<p class="lede">The gain held on test and grew slightly. Validation sd '
+          'over 20 seeds is 0.0003 and all 20 seeds beat the baseline. The run '
+          'converged in <b>5 research cycles</b> of the 50 permitted, logging 13 '
+          'experiments once its 8 exploit trials are counted, on <b>105,304 tokens</b> '
+          'and <b>59 minutes</b> of wall-clock with zero manual interventions.</p>',
+          '</section>']
 
     # ---- the search grid -------------------------------------------------
     h += ['<section class="reveal"><div class="eyebrow">The search</div>',

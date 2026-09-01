@@ -105,9 +105,18 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <div class="stat"><span class="v">10</span><span class="l">Accepted</span></div>
 <div class="stat"><span class="v">0.6038</span><span class="l">Best unaided, 20-seed</span></div>
 <div class="stat"><span class="v">102</span><span class="l">Stopped before training</span></div>
-<div class="stat"><span class="v">4.9</span><span class="l">GPU-hours, CPU only</span></div>
+<div class="stat"><span class="v">4.9</span><span class="l">CPU-core-hours, 0 GPU</span></div>
 <div class="stat"><span class="v">0</span><span class="l">Manual interventions</span></div>
 </div></header>
+<section class="reveal"><div class="eyebrow">The result</div>
+<h2>What was submitted</h2>
+<p class="lede">The validation-best checkpoint at convergence, measured over 20 seeds, then scored once on the hidden test split after the configuration was frozen. Test was unreachable during the search, so no selection decision could be contaminated by it.</p>
+<table class="runs"><thead><tr><th>split</th><th>GAUC</th><th>nDCG@5</th><th>primary</th><th>baseline primary</th><th>score_dataset</th></tr></thead><tbody>
+<tr><td>validation, 20-seed mean</td><td>0.6702</td><td>0.5373</td><td><b>0.6038</b></td><td>0.6016</td><td><b>+0.0022</b></td></tr>
+<tr><td>hidden test, scored once</td><td>0.6639</td><td>0.5304</td><td><b>0.5972</b></td><td>0.5946</td><td><b>+0.0026</b></td></tr>
+</tbody></table>
+<p class="lede">The gain held on test and grew slightly. Validation sd over 20 seeds is 0.0003 and all 20 seeds beat the baseline. The run converged in <b>5 research cycles</b> of the 50 permitted, logging 13 experiments once its 8 exploit trials are counted, on <b>105,304 tokens</b> and <b>59 minutes</b> of wall-clock with zero manual interventions.</p>
+</section>
 <section class="reveal"><div class="eyebrow">The search</div>
 <h2>Every experiment, every run</h2>
 <p class="lede">One cell per experiment, ordered as it happened. Most were caught before they cost a training run: a patch that reads as the intervention and changes nothing is the most common failure here, and it is detected in 0.4 seconds.</p>
@@ -260,20 +269,20 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <i class="cell kept" style="animation-delay:426ms" data-t="V5 agent_derive &middot; cycle 18|temporal-decay-weights|kept|0.6022"></i>
 <i class="cell crash" style="animation-delay:429ms" data-t="V5 agent_derive &middot; cycle 19|adaptive-weighting-unseen-users|crash|—"></i>
 </div></div>
-<div class="runrow"><div class="runlabel"><b>?</b> final</div><div class="cells">
-<i class="cell exploit" style="animation-delay:432ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.5915"></i>
-<i class="cell exploit" style="animation-delay:435ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.5986"></i>
-<i class="cell exploit" style="animation-delay:438ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.6028"></i>
-<i class="cell exploit" style="animation-delay:442ms" data-t="? final &middot; cycle 1|curriculum-learning|exploit|0.6012"></i>
-<i class="cell kept" style="animation-delay:445ms" data-t="? final &middot; cycle 1|curriculum-learning|kept|0.6023"></i>
-<i class="cell trained" style="animation-delay:448ms" data-t="? final &middot; cycle 2|dynamic-interaction-modeling|trained|0.5981"></i>
-<i class="cell exploit" style="animation-delay:451ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.5951"></i>
-<i class="cell exploit" style="animation-delay:454ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.5990"></i>
-<i class="cell exploit" style="animation-delay:458ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.6034"></i>
-<i class="cell exploit" style="animation-delay:461ms" data-t="? final &middot; cycle 3|length-normalization|exploit|0.6018"></i>
-<i class="cell kept" style="animation-delay:464ms" data-t="? final &middot; cycle 3|length-normalization|kept|0.6040"></i>
-<i class="cell blocked" style="animation-delay:467ms" data-t="? final &middot; cycle 4|sample-weighting|blocked|—"></i>
-<i class="cell trained" style="animation-delay:470ms" data-t="? final &middot; cycle 5|data-augmentation|trained|0.6037"></i>
+<div class="runrow"><div class="runlabel"><b>V6</b> final</div><div class="cells">
+<i class="cell exploit" style="animation-delay:432ms" data-t="V6 final &middot; cycle 1|curriculum-learning|exploit|0.5915"></i>
+<i class="cell exploit" style="animation-delay:435ms" data-t="V6 final &middot; cycle 1|curriculum-learning|exploit|0.5986"></i>
+<i class="cell exploit" style="animation-delay:438ms" data-t="V6 final &middot; cycle 1|curriculum-learning|exploit|0.6028"></i>
+<i class="cell exploit" style="animation-delay:442ms" data-t="V6 final &middot; cycle 1|curriculum-learning|exploit|0.6012"></i>
+<i class="cell kept" style="animation-delay:445ms" data-t="V6 final &middot; cycle 1|curriculum-learning|kept|0.6023"></i>
+<i class="cell trained" style="animation-delay:448ms" data-t="V6 final &middot; cycle 2|dynamic-interaction-modeling|trained|0.5981"></i>
+<i class="cell exploit" style="animation-delay:451ms" data-t="V6 final &middot; cycle 3|length-normalization|exploit|0.5951"></i>
+<i class="cell exploit" style="animation-delay:454ms" data-t="V6 final &middot; cycle 3|length-normalization|exploit|0.5990"></i>
+<i class="cell exploit" style="animation-delay:458ms" data-t="V6 final &middot; cycle 3|length-normalization|exploit|0.6034"></i>
+<i class="cell exploit" style="animation-delay:461ms" data-t="V6 final &middot; cycle 3|length-normalization|exploit|0.6018"></i>
+<i class="cell kept" style="animation-delay:464ms" data-t="V6 final &middot; cycle 3|length-normalization|kept|0.6040"></i>
+<i class="cell blocked" style="animation-delay:467ms" data-t="V6 final &middot; cycle 4|sample-weighting|blocked|—"></i>
+<i class="cell trained" style="animation-delay:470ms" data-t="V6 final &middot; cycle 5|data-augmentation|trained|0.6037"></i>
 </div></div>
 <div class="runrow"><div class="runlabel"><b>V4</b> run07</div><div class="cells">
 <i class="cell blocked" style="animation-delay:474ms" data-t="V4 run07 &middot; cycle 1|hybrid-cold-start|blocked|—"></i>
@@ -552,8 +561,8 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <circle fill="var(--kept)" cx="80.0" cy="164.4" r="6"><title>V4 05-autonomy-benchmark-21cyc: 0.6022 — temporal-decay-relevance</title></circle><text class="tick" x="80.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="80.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
 <circle fill="var(--kept)" cx="164.0" cy="121.2" r="6"><title>V4 06-clean-run-14cyc: 0.6031 — weighted-loss-imbalance</title></circle><text class="tick" x="164.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="164.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
 <circle fill="var(--kept)" cx="248.0" cy="164.4" r="6"><title>V5 agent_derive: 0.6022 — temporal-decay-weights</title></circle><text class="tick" x="248.0" y="150.4" text-anchor="middle">0.6022</text><text class="tick" x="248.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
-<circle fill="var(--kept)" cx="332.0" cy="159.6" r="6"><title>? final: 0.6023 — curriculum-learning</title></circle><text class="tick" x="332.0" y="145.6" text-anchor="middle">0.6023</text><text class="tick" x="332.0" y="278.0" text-anchor="middle" opacity=".75">?</text>
-<circle fill="var(--kept)" cx="416.0" cy="78.0" r="6"><title>? final: 0.6040 — length-normalization</title></circle><text class="tick" x="416.0" y="64.0" text-anchor="middle">0.6040</text><text class="tick" x="416.0" y="278.0" text-anchor="middle" opacity=".75">?</text>
+<circle fill="var(--kept)" cx="332.0" cy="159.6" r="6"><title>V6 final: 0.6023 — curriculum-learning</title></circle><text class="tick" x="332.0" y="145.6" text-anchor="middle">0.6023</text><text class="tick" x="332.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
+<circle fill="var(--kept)" cx="416.0" cy="78.0" r="6"><title>V6 final: 0.6040 — length-normalization</title></circle><text class="tick" x="416.0" y="64.0" text-anchor="middle">0.6040</text><text class="tick" x="416.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
 <circle fill="var(--kept)" cx="500.0" cy="135.6" r="6"><title>V4 run07: 0.6028 — temporal-patterns</title></circle><text class="tick" x="500.0" y="121.6" text-anchor="middle">0.6028</text><text class="tick" x="500.0" y="278.0" text-anchor="middle" opacity=".75">V4</text>
 <circle fill="var(--kept)" cx="584.0" cy="202.8" r="6"><title>V5 v5_exploit: 0.6014 — user-cluster-features</title></circle><text class="tick" x="584.0" y="188.8" text-anchor="middle">0.6014</text><text class="tick" x="584.0" y="278.0" text-anchor="middle" opacity=".75">V5</text>
 <circle fill="var(--kept)" cx="668.0" cy="121.2" r="6"><title>V6 v6: 0.6031 — class-weighted-loss</title></circle><text class="tick" x="668.0" y="107.2" text-anchor="middle">0.6031</text><text class="tick" x="668.0" y="278.0" text-anchor="middle" opacity=".75">V6</text>
@@ -594,13 +603,12 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <h2>Every generation, including the ones that failed</h2>
 <p class="lede">Each generation added a stage in response to a measured failure of the last. Two were built, measured, and reverted.</p>
 <div class="tblwrap"><table><thead><tr><th>Gen</th><th class="num">Runs</th><th class="num">Improved</th><th class="num">Experiments</th><th class="num">Best</th></tr></thead><tbody>
-<tr class="win"><td><span class="pill">?</span></td><td class="num">1</td><td class="num">1</td><td class="num">13</td><td class="num">0.6040</td></tr>
 <tr><td><span class="pill">V1</span></td><td class="num">1</td><td class="num">0</td><td class="num">20</td><td class="num">—</td></tr>
 <tr><td><span class="pill">V2</span></td><td class="num">1</td><td class="num">0</td><td class="num">25</td><td class="num">—</td></tr>
 <tr><td><span class="pill">V3</span></td><td class="num">1</td><td class="num">0</td><td class="num">25</td><td class="num">—</td></tr>
 <tr class="win"><td><span class="pill">V4</span></td><td class="num">4</td><td class="num">3</td><td class="num">61</td><td class="num">0.6031</td></tr>
 <tr class="win"><td><span class="pill">V5</span></td><td class="num">4</td><td class="num">2</td><td class="num">68</td><td class="num">0.6022</td></tr>
-<tr class="win"><td><span class="pill">V6</span></td><td class="num">5</td><td class="num">3</td><td class="num">97</td><td class="num">0.6031</td></tr>
+<tr class="win"><td><span class="pill">V6</span></td><td class="num">6</td><td class="num">4</td><td class="num">110</td><td class="num">0.6040</td></tr>
 <tr><td><span class="pill">V7</span></td><td class="num">2</td><td class="num">0</td><td class="num">48</td><td class="num">—</td></tr>
 <tr><td><span class="pill">V8</span></td><td class="num">2</td><td class="num">0</td><td class="num">30</td><td class="num">—</td></tr>
 </tbody></table></div></section>
@@ -625,7 +633,7 @@ footer{padding:52px 0 76px;color:var(--muted);font-size:13px}
 <tr class="win"><td class="mono">05-autonomy-benchmark-21cy</td><td><span class="pill">V4</span></td><td class="num">21</td><td class="num">42%</td><td class="num">1</td><td class="num">0.6022</td><td class="num">267K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">06-clean-run-14cyc</td><td><span class="pill">V4</span></td><td class="num">14</td><td class="num">64%</td><td class="num">1</td><td class="num">0.6031</td><td class="num">143K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">agent_derive</td><td><span class="pill">V5</span></td><td class="num">23</td><td class="num">61%</td><td class="num">1</td><td class="num">0.6022</td><td class="num">207K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
-<tr class="win"><td class="mono">final</td><td><span class="pill">?</span></td><td class="num">13</td><td class="num">92%</td><td class="num">2</td><td class="num">0.6040</td><td class="num">105K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
+<tr class="win"><td class="mono">final</td><td><span class="pill">V6</span></td><td class="num">13</td><td class="num">92%</td><td class="num">2</td><td class="num">0.6040</td><td class="num">105K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr class="win"><td class="mono">run07</td><td><span class="pill">V4</span></td><td class="num">20</td><td class="num">50%</td><td class="num">1</td><td class="num">0.6028</td><td class="num">228K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">converged</td></tr>
 <tr><td class="mono">v5</td><td><span class="pill">V5</span></td><td class="num">30</td><td class="num">45%</td><td class="num">0</td><td class="num">—</td><td class="num">303K</td><td class="mono" style="font-size:11.5px;color:var(--muted)">max_iterations</td></tr>
 <tr class="win"><td class="mono">v5_exploit</td><td><span class="pill">V5</span></td><td class="num">7</td><td class="num">83%</td><td class="num">1</td><td class="num">0.6014</td><td class="num">—</td><td class="mono" style="font-size:11.5px;color:var(--muted)">—</td></tr>
