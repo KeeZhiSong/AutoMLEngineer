@@ -290,10 +290,27 @@ Three files are loaded:
 
 Three are **deliberately not used**, and the reasons are part of the solution:
 
-- `video_features_statistic_pure.csv` is a **leakage hazard**. Its counters are
-  undated aggregates spanning the whole collection window, test included, so
-  `long_time_play_cnt / show_cnt` is close to a per-video `long_view` rate
-  computed partly on test labels. A contract test asserts we never load it.
+- `video_features_statistic_pure.csv` was **declined on an unverifiable
+  window**. Its 51 per-video counters are undated, nothing documents the period
+  they cover, and the organisers' FAQ forbids "feature statistics computed over"
+  the test split. `long_time_play_cnt / show_cnt` is very close to a per-video
+  `long_view` rate, so if that window includes test the feature is a partial
+  copy of the label. A contract test asserts we never load it.
+
+  **I tested that reasoning and it did not hold, which I report because it cuts
+  against me.** The statistic does predict the test-period rate after
+  controlling for the train-period rate (partial r = +0.276) — but it is a
+  platform-wide, far lower-variance estimate of a stable quantity, so it would
+  out-predict a noisy train estimate containing no test data at all. Against the
+  control that isolates exactly that (its extra explanatory power over a
+  *held-out train week* given the other train week, where leakage is impossible)
+  the figure is **+0.312, higher than the +0.276 it gets on test**. The evidence
+  says better measurement, not leak. The forfeit rests on the undocumented
+  window, not on demonstrated contamination.
+
+  **Declining it cost +0.0005** (0.6014 to 0.6019, three seeds per arm through
+  the frozen runner) — below one seed std, so it would not have cleared my own
+  keep threshold.
 - `user_features_pure.csv` is legal but inert. Ranking happens *within* a user,
   so any term constant across that user's impressions cannot reorder their list.
   I tested the obvious remedy, an explicit user-by-item cross, and measured
