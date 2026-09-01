@@ -256,6 +256,56 @@ Each exists because something got past the previous set.
 
 Before the leak guard existed, one such patch scored 0.6449 and was accepted.
 
+## The one file we declined, and what it cost
+
+`video_features_statistic_pure.csv` ships with KuaiRand-Pure and is legal by the
+letter of the rules. We did not use it, and a contract test asserts we never
+load it. The reasoning, and the evidence against our own reasoning:
+
+**Why we declined it.** The 51 per-video counters are undated. Neither the
+dataset nor the Starter Kit documents the window they cover, and FAQ 2.9.3
+forbids "feature statistics computed over" the test split.
+`long_time_play_cnt / show_cnt` is very close to a per-video `long_view` rate,
+so if the window includes the test period the feature is a partial copy of the
+scored label. We could not verify that it does not.
+
+**We tested the leakage hypothesis and it did not hold.** The statistic
+correlates with the test-period `long_view` rate after controlling for the
+train-period rate (partial r = **+0.276**). That looks like leakage until you
+notice the confound: the statistic is a platform-wide, far lower-variance
+estimate of a stable quantity, so it would out-predict a noisy train estimate
+with no test data in it at all. The control that isolates exactly that effect is
+the statistic's extra explanatory power over a **held-out train week** given the
+other train week, where leakage is impossible:
+
+| partial correlation | r |
+|---|---|
+| held-out train week, given the other train week (leakage impossible) | **+0.312** |
+| test period, given all of train | +0.276 |
+
+The test figure is **lower** than the leakage-free control, and the control is
+biased upward because one week is a noisier control than two. So the evidence is
+consistent with a better measurement, not a leak. We report this because it cuts
+against the decision we made.
+
+**What declining it cost: +0.0005.** Added as two decile-bucketed FM fields with
+edges fitted on train only, run through the frozen runner, 3 seeds per arm:
+
+| configuration | valid primary | seeds |
+|---|---|---|
+| reference, official 5 fields | 0.6014 | 0.6014, 0.6014, 0.6015 |
+| + platform statistic fields | 0.6019 | 0.6020, 0.6020, 0.6016 |
+| **delta** | **+0.0005** | below one seed std (0.0008) |
+
+It would not have cleared this loop's own keep threshold. Note this sizes the
+forfeit *for a factorisation machine over bucketed categorical fields*; a
+gradient-boosted model can exploit a continuous per-video rate far better, so
+the same file could be worth considerably more elsewhere.
+
+**The honest summary:** we declined a file whose provenance we could not verify,
+our own test for contamination came back negative, and the cost was inside the
+noise. The precaution was cheap, and it was not vindicated by measurement.
+
 ## Limitations
 
 1. **The agent now matches the human result, by a different route.** Both reach

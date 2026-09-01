@@ -260,10 +260,40 @@ published page cannot drift from the data it describes. Enable GitHub Pages on
 
 ## What we deliberately do not use
 
-- `video_features_statistic_pure.csv`, **leakage hazard.** Undated aggregate
-  counters spanning the whole collection window, including test.
-  `long_time_play_cnt / show_cnt` is close to a per-video `long_view` rate
-  computed partly on test labels. A contract test asserts we never load it.
+- `video_features_statistic_pure.csv`, **declined on an unverifiable window.**
+  Its 51 per-video counters are undated, and neither the dataset nor the
+  Starter Kit documents the period they cover. `long_time_play_cnt / show_cnt`
+  is very close to a per-video `long_view` rate, and FAQ 2.9.3 forbids "feature
+  statistics computed over" the test split. Since we cannot verify the counters
+  exclude the test window, we did not use them, and a contract test asserts we
+  never load the file.
+
+  **We tested the leakage hypothesis and it did not hold up, which we report
+  because the result cuts against us.** The question is whether the statistic
+  carries information about the scored period beyond what train legitimately
+  reveals. It does correlate with the test-period rate after controlling for the
+  train-period rate (partial r = +0.276) — but that is confounded, because the
+  statistic is a platform-wide, far lower-variance estimate of a stable quantity
+  and would beat a noisy train estimate with no test data in it at all. Against
+  a control that isolates exactly that effect — the statistic's extra
+  explanatory power over a *held-out train week*, given the other train week,
+  where leakage is impossible — the figure is **+0.312, higher than the +0.276
+  it gets on test**, and the control is biased upward. So the evidence is
+  consistent with the statistic being a better measurement, not a leak.
+
+  The forfeit therefore rests on the window being undocumented rather than on
+  demonstrated contamination. That is a weaker justification than we originally
+  wrote here, and it is the accurate one.
+
+  **And we measured what declining it cost.** Adding the statistic as two
+  decile-bucketed FM fields, edges fitted on train only, through the frozen
+  runner, 3 seeds each: reference **0.6014**, with the statistic **0.6019**, a
+  delta of **+0.0005**. That is below one published seed std (0.0008), so it
+  would not have cleared this loop's own keep threshold. The decision cost
+  approximately nothing *here*. It would likely be worth more to a
+  gradient-boosted model, which can use a continuous per-video rate far better
+  than a bucketed FM field can, so this number sizes the forfeit for our
+  pipeline and not in general.
 - `user_features_pure.csv`, legal, but a term constant within a user cannot
   reorder that user's list. We tested the obvious remedy, an explicit user×item
   cross, and **measured exactly 0.0000**: an FM already computes every pairwise
