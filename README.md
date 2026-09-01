@@ -244,7 +244,8 @@ Here is the whole submitted run, its own predictions against its own outcomes:
 
 **Four predictions were tested. None came true.** Both wins were over-predicted,
 by 5.9x and 2.4x; both losses were predicted positive and came back negative.
-The agent's mean predicted gain was +0.0035 against a mean actual of +0.0006.
+The agent predicted a gain on all four and averaged a small loss: mean predicted
+**+0.0035**, mean actual **−0.0004**.
 
 **That is the point, not an embarrassment.** The loop reached +0.0022 while its
 own forecasts were wrong every single time, because *nothing downstream believes
