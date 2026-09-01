@@ -482,9 +482,8 @@ The whole project, across 21 recorded runs:
   0.247 of headroom is still open; the organisers' own ranked list of promising
   directions (listwise loss, user behaviour sequences — the features here use no
   history at all, multi-task over the other 11 feedback signals, censored
-  watch-time regression, DeepFM/DCN) is largely unattempted; any open-source
-  library was in scope and I used none of them. And the measured bottleneck is
-  the coder itself: swapping `gpt-4o` for `gpt-5.5` went from 3 crashes and 0
+  watch-time regression, DeepFM/DCN) is largely unattempted. And the measured
+  bottleneck is the coder itself: swapping `gpt-4o` for `gpt-5.5` went from 3 crashes and 0
   keeps to 0 crashes and a keep. The loop is sound and the verification is
   trustworthy; the score is bounded by the box, not the method.
 - **The test split was scored once, at the very end.** It was unreachable for

@@ -478,8 +478,8 @@ over the official five categorical fields, with three editable modules. That box
 is the reason the whole project costs 59 minutes and 105K tokens on a laptop
 CPU. It is also a ceiling I chose.
 
-**A stronger model would score higher, and I would expect it to.** Three
-independent reasons, none of them speculative:
+**A stronger model would score higher, and I would expect it to.** Two
+independent reasons, neither of them speculative:
 
 1. **The headroom is real and mostly untouched.** The oracle is 0.8484 and the
    baseline 0.6016, so ~31% of the attainable range is captured and **0.247 is
@@ -489,12 +489,7 @@ independent reasons, none of them speculative:
    **no** history at all), multi-task learning over the other 11 feedback
    signals, censored watch-time regression, then DeepFM/DCN/xDeepFM. This
    project seriously attempted only the first.
-2. **Any open-source library was explicitly in scope** — PyTorch, RecBole,
-   TorchRec, LightGBM are named in the rules — and I used **none** of them. A
-   gradient-boosted ranker or a deep CTR model can exploit continuous per-item
-   statistics and behaviour sequences in ways a five-field FM structurally
-   cannot. Nothing here measures those architectures; it measures an FM.
-3. **Model quality moved the result, measurably.** Same architecture and
+2. **Model quality moved the result, measurably.** Same architecture and
    budget, only the coder swapped: `gpt-4o` produced 3 crashes, 0 keeps and 313K
    tokens; `gpt-5.5` produced 0 crashes, a keep at 0.6030, and 146K. CODE is the
    stage where runs are lost, so a better coding model converts directly into

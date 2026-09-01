@@ -323,8 +323,7 @@ noise. The precaution was cheap, and it was not vindicated by measurement.
    over the official five categorical fields. The oracle is 0.8484 with 0.247 of
    headroom still open, the organisers' own ranked directions (listwise loss,
    behaviour sequences, multi-task, censored watch-time, DeepFM/DCN) are largely
-   unattempted, and any open-source library was in scope and went unused. A
-   stronger learner, or a stronger coder — `gpt-4o` to `gpt-5.5` alone went from
+   unattempted. A stronger learner, or a stronger coder — `gpt-4o` to `gpt-5.5` alone went from
    0 keeps to 1 — should be expected to go higher.
 4. **The agent diagnoses better than it implements.** In one 25-cycle run it
    named the decisive problem four times and converted it to a working patch
