@@ -474,8 +474,19 @@ The whole project, across 21 recorded runs:
 - **It does not improve every run.** 8 of 11 clean-reference runs under V4 to V6.
   Run-to-run variance exceeds the difference between architecture generations, so
   no version is separable from another by result alone, and n is small.
-- **The practical ceiling for this approach looks like ~0.604** against an oracle
-  of 0.8484. Getting past it needs a different mechanism, not more tuning.
+- **~0.604 bounds this configuration, not the benchmark.** Seven directions are
+  closed by measurement, but all of them inside a deliberately narrow box: a
+  numpy factorisation machine over the official five categorical fields. That
+  box is why the project costs 59 minutes on a laptop CPU, and it is a ceiling I
+  chose. **A stronger model would score higher.** The oracle is 0.8484 and
+  0.247 of headroom is still open; the organisers' own ranked list of promising
+  directions (listwise loss, user behaviour sequences — the features here use no
+  history at all, multi-task over the other 11 feedback signals, censored
+  watch-time regression, DeepFM/DCN) is largely unattempted; any open-source
+  library was in scope and I used none of them. And the measured bottleneck is
+  the coder itself: swapping `gpt-4o` for `gpt-5.5` went from 3 crashes and 0
+  keeps to 0 crashes and a keep. The loop is sound and the verification is
+  trustworthy; the score is bounded by the box, not the method.
 - **The test split was scored once, at the very end.** It was unreachable for
   the whole search, so no selection decision could be contaminated by it. Scored
   once after the configuration was frozen, the submission reaches **test primary

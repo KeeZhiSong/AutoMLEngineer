@@ -318,7 +318,14 @@ noise. The precaution was cheap, and it was not vindicated by measurement.
 3. **Seven directions are closed by measurement** — feature stacking, seed
    ensembling, temporal decay (real but subsumed), cold start, auxiliary click
    targets, hand-built user×item crosses, and the remaining inherited
-   hyperparameters. The practical ceiling looks like ~0.604.
+   hyperparameters. **The practical ceiling of ~0.604 bounds this configuration,
+   not the benchmark**: every one of those seven was closed inside a numpy FM
+   over the official five categorical fields. The oracle is 0.8484 with 0.247 of
+   headroom still open, the organisers' own ranked directions (listwise loss,
+   behaviour sequences, multi-task, censored watch-time, DeepFM/DCN) are largely
+   unattempted, and any open-source library was in scope and went unused. A
+   stronger learner, or a stronger coder — `gpt-4o` to `gpt-5.5` alone went from
+   0 keeps to 1 — should be expected to go higher.
 4. **The agent diagnoses better than it implements.** In one 25-cycle run it
    named the decisive problem four times and converted it to a working patch
    zero times. Contract satisfaction runs 25–88% across runs.
