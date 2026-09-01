@@ -225,6 +225,70 @@ every genuine win is sub-ε and the run stops shortly after succeeding. The
 50-iteration budget was never the binding constraint; the stopping rule was.
 Convergence is not evaluated on a winning cycle.
 
+## What the agent proposed, and whether it came true
+
+Every cycle must state a hypothesis, a named source technique and a **numeric
+prediction** before any code is written. The prediction is recorded in
+`experiments.jsonl` at proposal time, so it cannot be revised after the result.
+That makes the run log scoreable against itself.
+
+Here is the whole submitted run, its own predictions against its own outcomes:
+
+| cycle | what it proposed | predicted | actual | verdict |
+|---|---|---|---|---|
+| 1 | `curriculum-learning` — grow training sequence length gradually, so the model adapts to varied list lengths | **+0.0050** | **+0.0009** | KEEP, 5.9x optimistic |
+| 2 | `dynamic-interaction-modeling` — an `interaction_depth` feature for user engagement level | **+0.0030** | **−0.0042** | REVERT, wrong sign |
+| 3 | `length-normalization` — pad training lists to the validation median to close a measured 6x mismatch | **+0.0040** | **+0.0017** | KEEP, 2.4x optimistic |
+| 4 | `sample-weighting` — down-weight over-represented positives to align with the metric | **+0.0060** | *never tested* | contract violated, no training |
+| 5 | `data-augmentation` — synthesise positive interactions from item-feature correlations | **+0.0020** | **−0.0002** | REVERT, wrong sign |
+
+**Four predictions were tested. None came true.** Both wins were over-predicted,
+by 5.9x and 2.4x; both losses were predicted positive and came back negative.
+The agent's mean predicted gain was +0.0035 against a mean actual of +0.0006.
+
+**That is the point, not an embarrassment.** The loop reached +0.0022 while its
+own forecasts were wrong every single time, because *nothing downstream believes
+the prediction*. The keep/revert gate is arithmetic on the measured score, the
+tie-break re-runs on 5 seeds, and the semantic contract checks whether the patch
+moved the quantity it named. A loop that acted on its predictions would have
+kept cycle 5 and chased cycle 4 hardest of all. Calibration is a nice property;
+**not requiring it is a design one.**
+
+**Cycle 4 is the sharpest case.** It carried the largest prediction of the run,
++0.0060, and never ran: the contract check found `initial_loss` unchanged at
+0.694438, so the patch had not implemented the intervention it described. The
+loop recorded "no evidence about the hypothesis" rather than a negative result,
+which is the distinction that keeps a botched implementation from being filed as
+a refuted idea.
+
+### One cycle end to end, in the agent's own words
+
+Cycle 3, the change that produced the submitted configuration. Nothing here was
+written by a human:
+
+**Problem** (from its own EDA, via CLASSIFY):
+> train/eval distribution mismatch: the percentage of users with list lengths of
+> at most 5 is 63.699% in validation, while it is 10.618% in training, a 6x
+> mismatch in how list lengths are distributed.
+
+**Hypothesis:**
+> Implement list length normalization via padding to the validation median to
+> reduce distribution mismatch impact on ranking performance.
+
+**Kill criterion**, committed before the run:
+> If the implementation yields a performance change of less than +0.001 or shows
+> a negative impact on within-user ordering, it should be abandoned.
+
+**Prediction:** +0.004 primary.  **Measured:** +0.0017 — under its prediction,
+over its kill criterion, so it survived on the rule it set for itself.
+
+It considered **four implementations** and scored them before choosing (median
+padding won on directness 5 / fidelity 4 / isolation 5), and it requested
+literature on its own initiative, citing importance sampling and
+covariate-shift reweighting for the problem class it had named. The full
+reasoning chain, the candidates it rejected and the retrieved literature are in
+`workspace_final/summary.json` under `best_checkpoint.idea`.
+
 ## Guards, each added because something got past the previous set
 
 | guard | what it caught |
