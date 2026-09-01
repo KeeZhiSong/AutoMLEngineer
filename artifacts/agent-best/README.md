@@ -4,6 +4,9 @@ Produced by the run in `workspace_final/`, from a 0.6014 reference with no
 task-specific answers in its technique library and zero manual interventions.
 
     valid     : 0.6038 over 20 seeds (sd 0.0003, min 0.6033, max 0.6043)
+                GAUC 0.6702 (sd 0.0004) / nDCG@5 0.5373 (sd 0.0002)
+                all 20 seeds above baseline; per-seed values in
+                workspace_final/seed_sweep_20.json
     vs baseline 0.6016 : +0.0022
     seed 0    : 0.6040
     run       : converged in 5 cycles (13 logged experiments, 8 of them exploit

@@ -68,14 +68,16 @@ configuration exactly**.
 
 Broken out against the official baseline:
 
-| metric | agent | official FM baseline | absolute delta |
+| metric | agent (20-seed mean) | official FM baseline | absolute delta |
 |---|---|---|---|
-| GAUC | 0.6705 | 0.6674 | **+0.0031** |
-| nDCG@5 | 0.5375 | 0.5357 | **+0.0018** |
-| primary | 0.6040 | 0.6016 | **+0.0024** |
+| GAUC | 0.6702 | 0.6674 | **+0.0028** |
+| nDCG@5 | 0.5373 | 0.5357 | **+0.0016** |
+| primary | **0.6038** | 0.6016 | **+0.0022** |
 
-Those are seed 0, the value the loop accepted; 0.6038 is the 20-seed mean, and
-it is the figure I report as the headline because it is the honest one.
+Every number in that table is a 20-seed mean, so the metrics and the primary
+come from one measurement rather than two. Seed 0 alone, the value the loop
+accepted at the time, reads 0.6705 / 0.5375 / 0.6040; it sits a little above
+average, which is why the submitted figure is the 20-seed one.
 
 It got there by a different route from the human configuration. The human path
 was a listwise objective trained on evaluation-length lists, plus a learning rate

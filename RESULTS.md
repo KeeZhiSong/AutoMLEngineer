@@ -126,16 +126,23 @@ Two accepted interventions, in order:
 
 ### Validation-best score, required benchmark
 
-| metric | ours | official baseline | absolute delta |
-|---|---|---|---|
-| GAUC | 0.6705 | 0.6674 | **+0.0031** |
-| nDCG@5 | 0.5375 | 0.5357 | **+0.0018** |
-| primary (mean of the two) | 0.6040 | 0.6016 | **+0.0024** |
-| **score_dataset** (equal-weighted mean of the metric deltas) | | | **+0.0024** |
+Measured over **20 seeds**, so the metric rows and the primary come from the
+same measurement:
 
-Those are seed 0. **Measured over 20 seeds the primary is 0.6038** (sd 0.0003,
-min 0.6033, max 0.6043), so the honest headline figure is **+0.0022**, and every
-one of the 20 seeds beat both the baseline and the previous best agent result.
+| metric | ours (20-seed mean) | sd | official baseline | absolute delta |
+|---|---|---|---|---|
+| GAUC | 0.6702 | 0.0004 | 0.6674 | **+0.0028** |
+| nDCG@5 | 0.5373 | 0.0002 | 0.5357 | **+0.0016** |
+| primary (mean of the two) | **0.6038** | 0.0003 | 0.6016 | **+0.0022** |
+| **score_dataset** (equal-weighted mean of the metric deltas) | | | | **+0.0022** |
+
+Range over the 20 seeds: primary min 0.6033, max 0.6043, and **all 20 beat both
+the baseline and the previous best agent result**. Per-seed values are in
+`workspace_final/seed_sweep_20.json`.
+
+For reference, seed 0 alone, the value the loop accepted at the time, reads
+GAUC 0.6705 / nDCG@5 0.5375 / primary 0.6040. It sits slightly above the mean,
+which is exactly why the submitted figure is the 20-seed one.
 
 The value at acceptance was a single seed. It cleared the tie-break band by
 0.0001 and so skipped confirmation, and a neighbouring configuration in the same
